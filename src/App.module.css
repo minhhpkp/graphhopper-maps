@@ -188,3 +188,30 @@
 .sidebarOpenButton:hover svg {
     fill: black;
 }
+.iconRow {
+    display: flex;
+    justify-content: center;
+    position: absolute;
+    top: 10px;
+    left: 250px;
+    right: 0;
+    gap: 10px;
+    z-index: 1000; /* Ensures it appears above the map */
+}
+
+.iconButton {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: white;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+.iconButton:hover {
+    background-color: #f1f1f1;
+}
+
