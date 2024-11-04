@@ -45,6 +45,7 @@ import useExternalMVTLayer from '@/layers/UseExternalMVTLayer'
 import LocationButton from '@/map/LocationButton'
 import { SettingsContext } from '@/contexts/SettingsContext'
 import usePOIsLayer from '@/layers/UsePOIsLayer'
+import { FaUtensils, FaHospital, FaSchool, FaGasPump, FaMoneyBill, FaBus, FaLandmark } from 'react-icons/fa'
 
 export const POPUP_CONTAINER_ID = 'popup-container'
 export const SIDEBAR_CONTENT_ID = 'sidebar-content'
@@ -121,6 +122,16 @@ export default function App() {
     return (
         <SettingsContext.Provider value={settings}>
             <div className={styles.appWrapper}>
+                <div className={styles.iconRow}>
+                <button className={styles.iconButton}><FaUtensils /> Nhà hàng</button>
+                <button className={styles.iconButton}><FaHospital /> Bệnh viện</button>
+                <button className={styles.iconButton}><FaSchool /> Trường học</button>
+                <button className={styles.iconButton}><FaGasPump /> Trạm xăng</button>
+                <button className={styles.iconButton}><FaMoneyBill /> ATM</button>
+                <button className={styles.iconButton}><FaBus /> Phương tiện công cộng</button> 
+                <button className={styles.iconButton}><FaLandmark /> Điểm tham quan</button> 
+
+                </div>
                 <MapPopups
                     map={map}
                     pathDetails={pathDetails}
