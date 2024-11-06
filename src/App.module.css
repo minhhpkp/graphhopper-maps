@@ -188,15 +188,15 @@
 .sidebarOpenButton:hover svg {
     fill: black;
 }
+
 .iconRow {
-    display: flex;
+    display: none;
     justify-content: center;
-    position: absolute;
-    top: 10px;
-    left: 250px;
-    right: 0;
-    gap: 10px;
-    z-index: 1000; /* Ensures it appears above the map */
+    position: fixed;
+    gap: 8px;
+    z-index: 1; /* Ensures it appears above the map */
+    bottom: 55px;
+    width: calc(100% - 41px);
 }
 
 .iconButton {
@@ -210,8 +210,75 @@
     font-size: 14px;
     transition: background-color 0.2s;
 }
-
+.iconButton > span {
+    display: none;
+}
 .iconButton:hover {
     background-color: #f1f1f1;
 }
 
+@media only screen and (min-width: 380px) {
+    .iconRow {
+        display: flex;
+    }
+}
+
+@media only screen and (min-width: 440px) {
+    .iconRow {
+        width: 100%;
+        gap: 10px;
+    }
+}
+
+@media only screen and (min-width: 705px) {
+    .iconRow {
+        bottom: 20px;
+    }
+}
+
+@media only screen and (min-width: 820px) {
+    .iconRow {
+        top: 10px;
+        left: 416px;
+
+        bottom: auto;
+        width: calc(100% - 470px);
+    }
+}
+
+@media only screen and (min-width: 1280px) {
+    .iconButton > span {
+        display: inline;
+        font-size: small;
+    }
+    .iconRow {
+        gap: 0.4vw;
+    }
+}
+
+@media only screen and (min-width: 1345px) {
+    .iconButton > span {
+        font-size: 0.9rem;
+    }
+}
+
+@media only screen and (min-width: 1380px) {
+    .iconButton > span {
+        font-size: 0.95rem;
+    }
+    .iconRow {
+        gap: 0.5vw;
+    }
+}
+
+@media only screen and (min-width: 1410px) {
+    .iconButton > span {
+        font-size: 1rem;
+    }
+}
+
+@media only screen and (min-width: 1440px) {
+    .iconRow {
+        gap: 0.7vw;
+    }
+}
