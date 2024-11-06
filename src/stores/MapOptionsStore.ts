@@ -60,7 +60,8 @@ const mapTilerSatellite: VectorStyle = {
 const osmOrg: RasterStyle = {
     name: 'OpenStreetMap',
     type: 'raster',
-    url: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+    // url: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+    url: ['https://tmdt.fimo.edu.vn/hot/{z}/{x}/{y}.png'],
     attribution: osmAttribution,
     maxZoom: 19,
 }
@@ -181,18 +182,18 @@ const wanderreitkarte: RasterStyle = {
 }
 
 const styleOptions: StyleOption[] = [
-    omniscale,
+    // omniscale,
     osmOrg,
-    osmCycl,
-    esriSatellite,
-    mapTilerSatellite,
-    tfTransport,
-    tfCycle,
-    tfOutdoors,
-    kurviger,
-    mapillion,
-    lyrk,
-    wanderreitkarte,
+    // osmCycl,
+    // esriSatellite,
+    // mapTilerSatellite,
+    // tfTransport,
+    // tfCycle,
+    // tfOutdoors,
+    // kurviger,
+    // mapillion,
+    // lyrk,
+    // wanderreitkarte,
 ]
 
 export default class MapOptionsStore extends Store<MapOptionsStoreState> {
