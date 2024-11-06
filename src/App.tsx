@@ -123,14 +123,27 @@ export default function App() {
         <SettingsContext.Provider value={settings}>
             <div className={styles.appWrapper}>
                 <div className={styles.iconRow}>
-                <button className={styles.iconButton}><FaUtensils /> Nhà hàng</button>
-                <button className={styles.iconButton}><FaHospital /> Bệnh viện</button>
-                <button className={styles.iconButton}><FaSchool /> Trường học</button>
-                <button className={styles.iconButton}><FaGasPump /> Trạm xăng</button>
-                <button className={styles.iconButton}><FaMoneyBill /> ATM</button>
-                <button className={styles.iconButton}><FaBus /> Phương tiện công cộng</button> 
-                <button className={styles.iconButton}><FaLandmark /> Điểm tham quan</button> 
-
+                    <button className={styles.iconButton}>
+                        <FaUtensils /> <span>Nhà hàng</span>
+                    </button>
+                    <button className={styles.iconButton}>
+                        <FaHospital /> <span>Bệnh viện</span>
+                    </button>
+                    <button className={styles.iconButton}>
+                        <FaSchool /> <span>Trường học</span>
+                    </button>
+                    <button className={styles.iconButton}>
+                        <FaGasPump /> <span>Trạm xăng</span>
+                    </button>
+                    <button className={styles.iconButton}>
+                        <FaMoneyBill /> <span>ATM</span>
+                    </button>
+                    <button className={styles.iconButton}>
+                        <FaBus /> <span>Phương tiện công cộng</span>
+                    </button>
+                    <button className={styles.iconButton}>
+                        <FaLandmark /> <span>Điểm tham quan</span>
+                    </button>
                 </div>
                 <MapPopups
                     map={map}
