@@ -61,7 +61,6 @@ export default function App() {
     const [pathDetails, setPathDetails] = useState(getPathDetailsStore().state)
     const [mapFeatures, setMapFeatures] = useState(getMapFeatureStore().state)
     const [pois, setPOIs] = useState(getPOIsStore().state)
-    const [collection, setCollection] = useState<any>(null);
 
     const map = getMap()
 
@@ -123,6 +122,7 @@ export default function App() {
     const fetchPoiData = async (poi_type: any) => {
         try {
             const response = await fetch(`${BACKEND_SERVER_URL}/poi?poi_type=${poi_type}`);
+            console.log(response)
             const data = await response.json();
             console.log(data);
         } catch (error) {
@@ -135,9 +135,15 @@ export default function App() {
         <SettingsContext.Provider value={settings}>
             <div className={styles.appWrapper}>
                 <div className={styles.iconRow}>
-                    <button className={styles.iconButton} onClick={() => { fetchPoiData("restaurant"); }}>
+                    <button
+                        className={styles.iconButton}
+                        onClick={async () => {
+                            await fetchPoiData("restaurant");
+                        }}
+                    >
                         <FaUtensils /> <span>Nhà hàng</span>
                     </button>
+
                     <button className={styles.iconButton} onClick={() => { fetchPoiData("hospital"); }}>
                         <FaHospital /> <span>Bệnh viện</span>
                     </button>
