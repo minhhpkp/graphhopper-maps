@@ -1,3 +1,9 @@
+# How to run:
+npm run start: Run both client and server
+npm install all: Install needed dependencies
+
+Other scripts: Read in package.json
+
 # GraphHopper Maps
 
 A route planner user interface for the [GraphHopper routing engine](https://github.com/graphhopper/graphhopper) released under the Apache License 2.0.
