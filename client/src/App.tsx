@@ -46,6 +46,7 @@ import LocationButton from '@/map/LocationButton'
 import { SettingsContext } from '@/contexts/SettingsContext'
 import usePOIsLayer from '@/layers/UsePOIsLayer'
 import { FaUtensils, FaHospital, FaSchool, FaGasPump, FaMoneyBill, FaBus, FaLandmark } from 'react-icons/fa'
+import { BACKEND_SERVER_URL } from './settings'
 
 export const POPUP_CONTAINER_ID = 'popup-container'
 export const SIDEBAR_CONTENT_ID = 'sidebar-content'
@@ -60,6 +61,7 @@ export default function App() {
     const [pathDetails, setPathDetails] = useState(getPathDetailsStore().state)
     const [mapFeatures, setMapFeatures] = useState(getMapFeatureStore().state)
     const [pois, setPOIs] = useState(getPOIsStore().state)
+    const [collection, setCollection] = useState<any>(null);
 
     const map = getMap()
 
@@ -118,30 +120,40 @@ export default function App() {
     usePathDetailsLayer(map, pathDetails)
     usePOIsLayer(map, pois)
 
+    const fetchPoiData = async (poi_type: any) => {
+        try {
+            const response = await fetch(`${BACKEND_SERVER_URL}/poi?poi_type=${poi_type}`);
+            const data = await response.json();
+            console.log(data);
+        } catch (error) {
+            console.error("Error fetching POI data:", error);
+        }
+    };
+
     const isSmallScreen = useMediaQuery({ query: '(max-width: 44rem)' })
     return (
         <SettingsContext.Provider value={settings}>
             <div className={styles.appWrapper}>
                 <div className={styles.iconRow}>
-                    <button className={styles.iconButton}>
+                    <button className={styles.iconButton} onClick={() => { fetchPoiData("restaurant"); }}>
                         <FaUtensils /> <span>Nhà hàng</span>
                     </button>
-                    <button className={styles.iconButton}>
+                    <button className={styles.iconButton} onClick={() => { fetchPoiData("hospital"); }}>
                         <FaHospital /> <span>Bệnh viện</span>
                     </button>
-                    <button className={styles.iconButton}>
+                    <button className={styles.iconButton} onClick={() => { fetchPoiData("school"); }}>
                         <FaSchool /> <span>Trường học</span>
                     </button>
-                    <button className={styles.iconButton}>
+                    <button className={styles.iconButton} onClick={() => { fetchPoiData("gas"); }}>
                         <FaGasPump /> <span>Trạm xăng</span>
                     </button>
-                    <button className={styles.iconButton}>
+                    <button className={styles.iconButton} onClick={() => { fetchPoiData("atm"); }}>
                         <FaMoneyBill /> <span>ATM</span>
                     </button>
-                    <button className={styles.iconButton}>
+                    <button className={styles.iconButton} onClick={() => { fetchPoiData("bus stop"); }}>
                         <FaBus /> <span>Phương tiện công cộng</span>
                     </button>
-                    <button className={styles.iconButton}>
+                    <button className={styles.iconButton} onClick={() => { fetchPoiData("tourist"); }}>
                         <FaLandmark /> <span>Điểm tham quan</span>
                     </button>
                 </div>

@@ -1,7 +1,9 @@
-/node_modules
-/.idea
-/.vscode
-*.iml
-/dist/
-*~
-config-*.js
+client/node_modules
+client/.idea
+client/.vscode
+client/*.iml
+client/dist/
+client/*~
+client/config-*.js
+server/node_modules
+node_modules
