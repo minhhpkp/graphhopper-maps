@@ -227,7 +227,7 @@ export default function AddressInput(props: AddressInputProps) {
                     }}
                     value={text}
                     placeholder={tr(
-                        type == QueryPointType.From ? 'from_hint' : type == QueryPointType.To ? 'to_hint' : 'via_hint'
+                        type == QueryPointType.From ? 'Địa điểm tìm kiếm' : type == QueryPointType.To ? 'to_hint' : 'via_hint'
                     )}
                 />
 
