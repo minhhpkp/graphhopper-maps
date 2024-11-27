@@ -39,3 +39,33 @@ export async function getPoiData(collection, poi_type) {
     return result;
 }
 
+export async function getPoiDataByCoordinate(collection, poi_coordinate) {
+    const cursor = collection.find({});
+
+    let distPois = (coor1, coor2) => {
+        let ret = Math.abs((coor1[0] - coor2[0]) * (coor1[0] - coor2[0]) - (coor1[1] - coor2[1]) * (coor1[1] - coor2[1]));
+        return Math.sqrt(ret);
+    }
+
+    let limitLog = 10;
+
+    let minDist = 1000000000;
+
+    while (await cursor.hasNext()) {
+        const document = await cursor.next();
+
+        if (Array.isArray(document.coordinate)) {
+            minDist = Math.min(minDist, distPois(document.coordinate, poi_coordinate));
+            if (distPois(document.coordinate, poi_coordinate) < 0.0001) {
+                console.log("Found POI. Dist of pois is: ", distPois(document.coordinate, poi_coordinate));
+                return document;
+            }
+            
+        }
+    }
+
+    console.log("Min dist is: ", minDist);
+
+    return {message: "Not found"};
+}
+
