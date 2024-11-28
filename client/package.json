@@ -15,6 +15,7 @@
         "test": "jest"
     },
     "dependencies": {
+        "axios": "^1.7.8",
         "custom-model-editor": "github:graphhopper/custom-model-editor#3a46b6981d170b7eb70d621bbb92caed149e5a97",
         "dotenv": "^16.4.5",
         "express": "^4.21.1",

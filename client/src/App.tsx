@@ -47,6 +47,7 @@ import { SettingsContext } from '@/contexts/SettingsContext'
 import usePOIsLayer from '@/layers/UsePOIsLayer'
 import { FaUtensils, FaHospital, FaSchool, FaGasPump, FaMoneyBill, FaBus, FaLandmark } from 'react-icons/fa'
 import { BACKEND_SERVER_URL } from './settings'
+import axios from 'axios';
 
 export const POPUP_CONTAINER_ID = 'popup-container'
 export const SIDEBAR_CONTENT_ID = 'sidebar-content'
@@ -121,10 +122,10 @@ export default function App() {
 
     const fetchPoiData = async (poi_type: any) => {
         try {
-            const response = await fetch(`${BACKEND_SERVER_URL}/poi?poi_type=${poi_type}`);
+            const response = await axios.get(`${BACKEND_SERVER_URL}/poi`, {
+                params: { poi_type: poi_type },
+            });
             console.log(response)
-            const data = await response.json();
-            console.log(data);
         } catch (error) {
             console.error("Error fetching POI data:", error);
         }
