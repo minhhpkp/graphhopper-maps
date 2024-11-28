@@ -1,6 +1,7 @@
 import express from "express";
 import { getPoiData, getPoiDataByCoordinate, getVietnamPoiCollection } from "./tmdt_poi.js";
-import cors from "cors";
+import { client, connectToDB } from "./db.js";
+import cors from "cors"
 
 
 const app = express();
@@ -8,8 +9,9 @@ app.use(cors());
 
 const PORT = process.env.PORT || 3002;
 
+await connectToDB();
 
-app.get("/poi", async (req, res) => {
+app.get("/api/poi", async (req, res) => {
     try {
         const { poi_type } = req.query;
         const collection = await getVietnamPoiCollection();
@@ -22,7 +24,7 @@ app.get("/poi", async (req, res) => {
     }
 });
 
-app.get("/poi/xxx", async (req, res) => {
+app.get("/api/poi/xxx", async (req, res) => {
     try {
         const { poi_x, poi_y } = req.query;
         console.log(poi_x, poi_y)

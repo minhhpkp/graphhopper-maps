@@ -55,6 +55,7 @@ import { ClearRoute, InvalidatePoint, MovePoint, RemovePoint, SetBBox, SetPoint 
 import { tr } from './translation/Translation'
 import { MarkerComponent } from './map/Marker'
 import AddressInput from './sidebar/search/AddressInput'
+import axios from 'axios';
 
 export const POPUP_CONTAINER_ID = 'popup-container'
 export const SIDEBAR_CONTENT_ID = 'sidebar-content'
@@ -129,10 +130,11 @@ export default function App() {
 
     const fetchPoiData = async (poi_type: any) => {
         try {
-            const response = await axios.get(`${BACKEND_SERVER_URL}/poi`, {
+            const response = await axios.get(`/api/poi`, {
                 params: { poi_type: poi_type },
             });
-            console.log(response)
+            const data = response.data;
+            console.log(data)
         } catch (error) {
             console.error("Error fetching POI data:", error);
         }

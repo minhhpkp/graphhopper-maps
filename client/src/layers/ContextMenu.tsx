@@ -7,6 +7,7 @@ import styles from '@/layers/ContextMenu.module.css'
 import { RouteStoreState } from '@/stores/RouteStore'
 import {BACKEND_SERVER_URL} from "@/settings";
 import { createSvg } from './createMarkerSVG';
+import axios from 'axios'
 
 interface ContextMenuProps {
     map: Map
@@ -52,10 +53,10 @@ export default function ContextMenu({ map, route, queryPoints }: ContextMenuProp
     
         setLoading(true);
         try {
-            const response = await fetch(`http://localhost:3002/poi/xxx?poi_x=${lat}&poi_y=${lng}`, {
+            const response = await axios.get(`/api/poi/xxx?poi_x=${lat}&poi_y=${lng}`, {
                 signal: controller.signal,
             });
-            const data = await response.json();
+            const data = response.data;
             setPoiData(data);
             setLoading(false);
             console.log('Fetched POI data:', data);

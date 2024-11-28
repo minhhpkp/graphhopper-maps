@@ -2,7 +2,7 @@ import { client, connectToDB } from "./db.js";
 
 export async function getVietnamPoiCollection() {
     try {
-        await connectToDB();
+        // await connectToDB();
         
         const database = client.db("tmdt");
         const collection = database.collection("vietnam_poi_details");
