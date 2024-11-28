@@ -1,5 +1,5 @@
 import express from "express";
-import { getPoiData, getVietnamPoiCollection } from "./tmdt_poi.js";
+import { getPoiData, getPoiDataByCoordinate, getVietnamPoiCollection } from "./tmdt_poi.js";
 import cors from "cors";
 
 
@@ -22,6 +22,19 @@ app.get("/poi", async (req, res) => {
     }
 });
 
+app.get("/poi/xxx", async (req, res) => {
+    try {
+        const { poi_x, poi_y } = req.query;
+        console.log(poi_x, poi_y)
+        const collection = await getVietnamPoiCollection();
+        const poi = await getPoiDataByCoordinate(collection, [poi_x, poi_y]);
+        console.log(poi_x, poi_y)
+        res.json(poi);
+    } catch (error) {
+        console.error("Error fetching POIs:", error);
+        res.status(500).json({ error: "Error fetching POIs" });
+    }
+});
 
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server is running at http://localhost:${PORT}`);

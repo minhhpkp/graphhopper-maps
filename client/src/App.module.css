@@ -1,3 +1,70 @@
+.sidebarContent {
+    background-color: #f9f9f9; /* Màu nền nhạt */
+    border-right: 1px solid #ddd; /* Đường viền bên phải */
+    display: flex;
+    flex-direction: column;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Hiệu ứng đổ bóng */
+    z-index: 100; /* Đảm bảo sidebar nằm trên các thành phần khác */
+}
+
+.container {
+    display: flex;
+    justify-content: flex-end; /* Canh phải nút đóng */
+    background-color: #fff; /* Màu nền trắng cho header */
+    border-bottom: 1px solid #ddd; /* Đường viền bên dưới */
+}
+
+.sidebarCloseButton {
+    background-color: transparent; /* Nền trong suốt */
+    border: none; /* Loại bỏ đường viền */
+    font-size: 24px; /* Tăng kích thước biểu tượng */
+    cursor: pointer;
+    color: #555; /* Màu biểu tượng */
+    transition: color 0.3s ease;
+
+}
+
+.sidebarCloseButton:hover {
+    background-color: #0056b3; /* Màu xanh đậm hơn khi hover */
+    transform: scale(1.1); /* Phóng to khi hover */
+}
+
+.searchBox {
+    padding: 20px; /* Khoảng cách bên trong */
+    background-color: #f9f9f9; /* Màu nền cho vùng tìm kiếm */
+}
+
+.searchBox input {
+    width: 96.2%;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px; 
+    outline: none; 
+    transition: border-color 0.3s ease;
+    margin-right: 20px;
+}
+
+.searchBox input:focus {
+    border-color: #007bff;
+}
+
+.searchBox button {
+    margin-top: 10px; 
+    margin-right: 50px;
+    width: 100%; 
+    font-size: 16px; /* Kích thước chữ */
+    color: #fff; /* Màu chữ trắng */
+    background-color: #007bff; /* Màu nền xanh */
+    border: none; /* Loại bỏ đường viền */
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.searchBox button:hover {
+    background-color: #0056b3; /* Màu nền khi hover */
+}
+
 .appWrapper {
     width: 100%;
     height: 100%;
@@ -9,7 +76,7 @@
     justify-content: space-between;
     overflow: auto;
     -webkit-user-select: none;
-    user-select: none; /* firefox does not ignore -webkit-user-select so make this explicit, see #217 */
+    user-select: none; 
 }
 
 .map {
