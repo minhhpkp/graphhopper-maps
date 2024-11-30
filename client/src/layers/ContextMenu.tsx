@@ -52,7 +52,7 @@ export default function ContextMenu({ map, route, queryPoints }: ContextMenuProp
     
         setLoading(true);
         try {
-            const response = await fetch(`http://localhost:3002/poi/xxx?poi_x=${lat}&poi_y=${lng}`, {
+            const response = await fetch(`${BACKEND_SERVER_URL}/poi/xxx?poi_x=${lat}&poi_y=${lng}`, {
                 signal: controller.signal,
             });
             const data = await response.json();

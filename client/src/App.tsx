@@ -130,6 +130,8 @@ export default function App() {
         }
     };
 
+    
+
     const isSmallScreen = useMediaQuery({ query: '(max-width: 44rem)' })
     return (
         <SettingsContext.Provider value={settings}>

@@ -1,4 +1,7 @@
 {
+  "name": "graphhoper-maps",
+  "version": "1.0.0",
+  "type": "module",
   "scripts": {
     "start": "node src/app.js"
   },
@@ -6,5 +9,10 @@
     "cors": "^2.8.5",
     "express": "^4.21.1",
     "mongodb": "^6.10.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.26.0",
+    "@babel/node": "^7.26.0",
+    "@babel/preset-env": "^7.26.0"
   }
 }
