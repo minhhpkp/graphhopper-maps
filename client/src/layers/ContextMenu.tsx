@@ -72,7 +72,10 @@ export default function ContextMenu({ map, route, queryPoints }: ContextMenuProp
 
         setLoading(true)
         try {
-            const response = await axios.get(`/api/poi/nearest`, { params: { lat, lng }, signal: controller.signal })
+            const response = await axios.get(`/api/poi/find-closest-place`, {
+                params: { lat, lng },
+                signal: controller.signal,
+            })
             const data = response.data
             setPoiData(data)
             setLoading(false)
