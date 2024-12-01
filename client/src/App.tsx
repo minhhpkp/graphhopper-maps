@@ -13,7 +13,6 @@ import {
     getSettingsStore,
 } from '@/stores/Stores'
 
-
 import MapComponent from '@/map/MapComponent'
 import MapOptions from '@/map/MapOptions'
 import MobileSidebar from '@/sidebar/MobileSidebar'
@@ -48,17 +47,129 @@ import LocationButton from '@/map/LocationButton'
 import { SettingsContext } from '@/contexts/SettingsContext'
 import usePOIsLayer from '@/layers/UsePOIsLayer'
 import { FaUtensils, FaHospital, FaSchool, FaGasPump, FaMoneyBill, FaBus, FaLandmark, FaRoute } from 'react-icons/fa'
-import { IoArrowRedoCircleSharp } from "react-icons/io5";
-import { BACKEND_SERVER_URL } from './settings'
+import { IoArrowRedoCircleSharp } from 'react-icons/io5'
 import Dispatcher from './stores/Dispatcher'
 import { ClearRoute, InvalidatePoint, MovePoint, RemovePoint, SetBBox, SetPoint } from './actions/Actions'
 import { tr } from './translation/Translation'
 import { MarkerComponent } from './map/Marker'
-import AddressInput from './sidebar/search/AddressInput'
-import axios from 'axios';
+import AddressInput, { handlePoiSearch, ReverseGeocoder } from './sidebar/search/AddressInput'
+import axios from 'axios'
+import { POIQueryItem } from './sidebar/search/AddressInputAutocomplete'
+import { AddressParseResult, POIAndQuery, POIPhrase, POIQuery } from './pois/AddressParseResult'
+import { getApi } from './api/Api'
 
 export const POPUP_CONTAINER_ID = 'popup-container'
 export const SIDEBAR_CONTENT_ID = 'sidebar-content'
+
+const queryPoint = {
+    isInitialized: false,
+    queryText: '',
+    coordinate: {
+        lat: 0,
+        lng: 0,
+    },
+    id: 0,
+    color: '#7cb342',
+    type: 0,
+}
+class PoiSearch {
+    private readonly addressParseResult: AddressParseResult
+    constructor(addressParseResult: AddressParseResult) {
+        this.addressParseResult = addressParseResult
+    }
+    search() {
+        const poiSearch = new ReverseGeocoder(getApi(), queryPoint, AddressParseResult.handleGeocodingResponse)
+        handlePoiSearch(poiSearch, this.addressParseResult, getMap())
+    }
+}
+const foodSearch = new PoiSearch(
+    new AddressParseResult(
+        '',
+        new POIQuery([
+            new POIAndQuery([
+                new POIPhrase('amenity', '~', 'restaurant|food_court|cafe|fast_food|pub|bar|street_vendor', false),
+            ]),
+        ]),
+        'restaurant',
+        'restaurants'
+    )
+)
+const hospitalSearch = new PoiSearch(
+    new AddressParseResult(
+        '',
+        new POIQuery([
+            new POIAndQuery([
+                new POIPhrase(
+                    'amenity',
+                    '~',
+                    'hospital|clinic|doctors|pharmacy|dentist|nursing_home|healthcare',
+                    false
+                ),
+            ]),
+            new POIAndQuery([
+                new POIPhrase('amenity', '=', 'doctors', false),
+                new POIPhrase('healthcare', '=', 'doctor', false),
+            ]),
+        ]),
+        'local_hospital',
+        'hospitals'
+    )
+)
+const educationSearch = new PoiSearch(
+    new AddressParseResult(
+        '',
+        new POIQuery([
+            new POIAndQuery([new POIPhrase('amenity', '~', 'school|college|university|kindergarten|library', false)]),
+        ]),
+        'school',
+        'education'
+    )
+)
+const gasStationSearch = new PoiSearch(
+    new AddressParseResult(
+        '',
+        new POIQuery([new POIAndQuery([new POIPhrase('amenity', '=', 'fuel', false)])]),
+        'local_gas_station',
+        'gas stations'
+    )
+)
+const atmSearch = new PoiSearch(
+    new AddressParseResult(
+        '',
+        new POIQuery([
+            new POIAndQuery([new POIPhrase('amenity', '=', 'atm', false)]),
+            new POIAndQuery([new POIPhrase('amenity', '=', 'bank', false)]),
+        ]),
+        'local_atm',
+        'atm'
+    )
+)
+const publicTransitSearch = new PoiSearch(
+    new AddressParseResult(
+        '',
+        new POIQuery([
+            new POIAndQuery([
+                new POIPhrase('aeroway', '=', 'aerodrome', false),
+                new POIPhrase('landuse', '!=', 'military', false),
+                new POIPhrase('military', '!~', '.*', false),
+            ]),
+            new POIAndQuery([new POIPhrase('highway', '=', 'bus_stop', false)]),
+            new POIAndQuery([new POIPhrase('railway', '~', 'halt|station|subway_station', false)]),
+            new POIAndQuery([new POIPhrase('amenity', '~', 'bus_station|ferry_terminal|airport', false)]),
+            new POIAndQuery([new POIPhrase('public_transport', '~', 'station|stop_position|platform', false)]),
+        ]),
+        'train',
+        'public transit'
+    )
+)
+const tourismSearch = new PoiSearch(
+    new AddressParseResult(
+        '',
+        new POIQuery([new POIAndQuery([new POIPhrase('tourism', '=', '*', false)])]),
+        'luggage',
+        'tourism'
+    )
+)
 
 export default function App() {
     const [settings, setSettings] = useState(getSettingsStore().state)
@@ -132,45 +243,40 @@ export default function App() {
         try {
             const response = await axios.get(`/api/poi`, {
                 params: { poi_type: poi_type },
-            });
-            const data = response.data;
+            })
+            const data = response.data
             console.log(data)
         } catch (error) {
-            console.error("Error fetching POI data:", error);
+            console.error('Error fetching POI data:', error)
         }
-    };
+    }
 
     const isSmallScreen = useMediaQuery({ query: '(max-width: 44rem)' })
     return (
         <SettingsContext.Provider value={settings}>
             <div className={styles.appWrapper}>
                 <div className={styles.iconRow}>
-                    <button
-                        className={styles.iconButton}
-                        onClick={async () => {
-                            await fetchPoiData("restaurant");
-                        }}
-                    >
-                        <FaUtensils /> <span>Nhà hàng</span>
+                    <button className={styles.iconButton} onClick={() => foodSearch.search()}>
+                        <FaUtensils /> <span>Ăn uống</span>
                     </button>
 
-                    <button className={styles.iconButton} onClick={() => { fetchPoiData("hospital"); }}>
-                        <FaHospital /> <span>Bệnh viện</span>
+                    <button className={styles.iconButton} onClick={() => hospitalSearch.search()}>
+                        <FaHospital /> <span>Y tế</span>
                     </button>
-                    <button className={styles.iconButton} onClick={() => { fetchPoiData("school"); }}>
-                        <FaSchool /> <span>Trường học</span>
+                    <button className={styles.iconButton} onClick={() => educationSearch.search()}>
+                        <FaSchool /> <span>Giáo dục</span>
                     </button>
-                    <button className={styles.iconButton} onClick={() => { fetchPoiData("gas"); }}>
+                    <button className={styles.iconButton} onClick={() => gasStationSearch.search()}>
                         <FaGasPump /> <span>Trạm xăng</span>
                     </button>
-                    <button className={styles.iconButton} onClick={() => { fetchPoiData("atm"); }}>
+                    <button className={styles.iconButton} onClick={() => atmSearch.search()}>
                         <FaMoneyBill /> <span>ATM</span>
                     </button>
-                    <button className={styles.iconButton} onClick={() => { fetchPoiData("bus stop"); }}>
+                    <button className={styles.iconButton} onClick={() => publicTransitSearch.search()}>
                         <FaBus /> <span>Phương tiện công cộng</span>
                     </button>
-                    <button className={styles.iconButton} onClick={() => { fetchPoiData("tourist"); }}>
-                        <FaLandmark /> <span>Điểm tham quan</span>
+                    <button className={styles.iconButton} onClick={() => tourismSearch.search()}>
+                        <FaLandmark /> <span>Du lịch</span>
                     </button>
                 </div>
                 <MapPopups
@@ -285,7 +391,7 @@ function LargeScreenLayout({ query, route, map, error, mapOptions, encodedValues
                             >
                                 <IoArrowRedoCircleSharp
                                     style={{
-                                        fontSize: '32px', 
+                                        fontSize: '32px',
                                     }}
                                 />
                             </PlainButton>
@@ -312,7 +418,6 @@ function LargeScreenLayout({ query, route, map, error, mapOptions, encodedValues
                         </div>
                     </div>
                 </div>
-
             )}
             <div className={styles.popupContainer} id={POPUP_CONTAINER_ID} />
             <div className={styles.onMapRightSide}>
@@ -462,9 +567,7 @@ const SearchBox = ({
                     onDragLeave={() => onDropPreviewSelect(-1)}
                     onDrop={onClickOrDrop}
                     onClick={onClickOrDrop}
-                >
-
-                </PlainButton>
+                ></PlainButton>
             )}
 
             <div className={styles.searchBoxInput}>
@@ -508,9 +611,7 @@ const SearchBox = ({
                         onMoveStartSelect(-1, true)
                     }}
                     className={styles.removeSearchBox}
-                >
-
-                </PlainButton>
+                ></PlainButton>
             )}
         </>
     )

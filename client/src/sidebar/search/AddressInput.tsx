@@ -227,7 +227,11 @@ export default function AddressInput(props: AddressInputProps) {
                     }}
                     value={text}
                     placeholder={tr(
-                        type == QueryPointType.From ? 'Địa điểm tìm kiếm' : type == QueryPointType.To ? 'to_hint' : 'via_hint'
+                        type == QueryPointType.From
+                            ? 'Địa điểm tìm kiếm'
+                            : type == QueryPointType.To
+                            ? 'to_hint'
+                            : 'via_hint'
                     )}
                 />
 
@@ -261,6 +265,8 @@ export default function AddressInput(props: AddressInputProps) {
                                     hideSuggestions()
                                     onCurrentLocationSelected(props.onAddressSelected)
                                 } else if (item instanceof POIQueryItem) {
+                                    console.log(poiSearch)
+                                    console.log(item)
                                     hideSuggestions()
                                     handlePoiSearch(poiSearch, item.result, props.map)
                                     setText(item.result.text(item.result.poi))
@@ -275,7 +281,7 @@ export default function AddressInput(props: AddressInputProps) {
     )
 }
 
-function handlePoiSearch(poiSearch: ReverseGeocoder, result: AddressParseResult, map: Map) {
+export function handlePoiSearch(poiSearch: ReverseGeocoder, result: AddressParseResult, map: Map) {
     if (!result.hasPOIs()) return
 
     const origExtent = map.getView().calculateExtent(map.getSize())

@@ -32,6 +32,7 @@ declare module 'config' {
         maxZoom?: number
     }
     const profiles: object
+    const poiApi: string
 }
 
 declare module 'react-responsive' {
