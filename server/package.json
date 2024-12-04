@@ -1,4 +1,7 @@
 {
+  "name": "graphhoper-maps",
+  "version": "1.0.0",
+  "type": "module",
   "scripts": {
     "start": "node src/app.mjs",
     "import-data": "node data/importData.js"

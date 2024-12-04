@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import PathDetails from '@/pathDetails/PathDetails'
 import styles from './App.module.css'
 import {
@@ -12,14 +12,13 @@ import {
     getRouteStore,
     getSettingsStore,
 } from '@/stores/Stores'
-
 import MapComponent from '@/map/MapComponent'
 import MapOptions from '@/map/MapOptions'
 import MobileSidebar from '@/sidebar/MobileSidebar'
 import { useMediaQuery } from 'react-responsive'
 import RoutingResults from '@/sidebar/RoutingResults'
 import PoweredBy from '@/sidebar/PoweredBy'
-import { getBBoxFromCoord, QueryPoint, QueryStoreState, RequestState } from '@/stores/QueryStore'
+import { QueryStoreState, RequestState } from '@/stores/QueryStore'
 import { RouteStoreState } from '@/stores/RouteStore'
 import { MapOptionsStoreState } from '@/stores/MapOptionsStore'
 import { ErrorStoreState } from '@/stores/ErrorStore'
@@ -46,130 +45,12 @@ import useExternalMVTLayer from '@/layers/UseExternalMVTLayer'
 import LocationButton from '@/map/LocationButton'
 import { SettingsContext } from '@/contexts/SettingsContext'
 import usePOIsLayer from '@/layers/UsePOIsLayer'
-import { FaUtensils, FaHospital, FaSchool, FaGasPump, FaMoneyBill, FaBus, FaLandmark, FaRoute } from 'react-icons/fa'
-import { IoArrowRedoCircleSharp } from 'react-icons/io5'
-import Dispatcher from './stores/Dispatcher'
-import { ClearRoute, InvalidatePoint, MovePoint, RemovePoint, SetBBox, SetPoint } from './actions/Actions'
-import { tr } from './translation/Translation'
-import { MarkerComponent } from './map/Marker'
-import AddressInput, { handlePoiSearch, ReverseGeocoder } from './sidebar/search/AddressInput'
-import axios from 'axios'
-import { POIQueryItem } from './sidebar/search/AddressInputAutocomplete'
-import { AddressParseResult, POIAndQuery, POIPhrase, POIQuery } from './pois/AddressParseResult'
-import { getApi } from './api/Api'
-
+import { FaUtensils, FaHospital, FaSchool, FaGasPump, FaMoneyBill, FaBus, FaLandmark } from 'react-icons/fa'
+import { BACKEND_SERVER_URL } from './settings'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowLeft, faBars, faClose, faDiamondTurnRight, faMapSigns } from '@fortawesome/free-solid-svg-icons';
 export const POPUP_CONTAINER_ID = 'popup-container'
 export const SIDEBAR_CONTENT_ID = 'sidebar-content'
-
-const queryPoint = {
-    isInitialized: false,
-    queryText: '',
-    coordinate: {
-        lat: 0,
-        lng: 0,
-    },
-    id: 0,
-    color: '#7cb342',
-    type: 0,
-}
-class PoiSearch {
-    private readonly addressParseResult: AddressParseResult
-    constructor(addressParseResult: AddressParseResult) {
-        this.addressParseResult = addressParseResult
-    }
-    search() {
-        const poiSearch = new ReverseGeocoder(getApi(), queryPoint, AddressParseResult.handleGeocodingResponse)
-        handlePoiSearch(poiSearch, this.addressParseResult, getMap())
-    }
-}
-const foodSearch = new PoiSearch(
-    new AddressParseResult(
-        '',
-        new POIQuery([
-            new POIAndQuery([
-                new POIPhrase('amenity', '~', 'restaurant|food_court|cafe|fast_food|pub|bar|street_vendor', false),
-            ]),
-        ]),
-        'restaurant',
-        'restaurants'
-    )
-)
-const hospitalSearch = new PoiSearch(
-    new AddressParseResult(
-        '',
-        new POIQuery([
-            new POIAndQuery([
-                new POIPhrase(
-                    'amenity',
-                    '~',
-                    'hospital|clinic|doctors|pharmacy|dentist|nursing_home|healthcare',
-                    false
-                ),
-            ]),
-            new POIAndQuery([
-                new POIPhrase('amenity', '=', 'doctors', false),
-                new POIPhrase('healthcare', '=', 'doctor', false),
-            ]),
-        ]),
-        'local_hospital',
-        'hospitals'
-    )
-)
-const educationSearch = new PoiSearch(
-    new AddressParseResult(
-        '',
-        new POIQuery([
-            new POIAndQuery([new POIPhrase('amenity', '~', 'school|college|university|kindergarten|library', false)]),
-        ]),
-        'school',
-        'education'
-    )
-)
-const gasStationSearch = new PoiSearch(
-    new AddressParseResult(
-        '',
-        new POIQuery([new POIAndQuery([new POIPhrase('amenity', '=', 'fuel', false)])]),
-        'local_gas_station',
-        'gas stations'
-    )
-)
-const atmSearch = new PoiSearch(
-    new AddressParseResult(
-        '',
-        new POIQuery([
-            new POIAndQuery([new POIPhrase('amenity', '=', 'atm', false)]),
-            new POIAndQuery([new POIPhrase('amenity', '=', 'bank', false)]),
-        ]),
-        'local_atm',
-        'atm'
-    )
-)
-const publicTransitSearch = new PoiSearch(
-    new AddressParseResult(
-        '',
-        new POIQuery([
-            new POIAndQuery([
-                new POIPhrase('aeroway', '=', 'aerodrome', false),
-                new POIPhrase('landuse', '!=', 'military', false),
-                new POIPhrase('military', '!~', '.*', false),
-            ]),
-            new POIAndQuery([new POIPhrase('highway', '=', 'bus_stop', false)]),
-            new POIAndQuery([new POIPhrase('railway', '~', 'halt|station|subway_station', false)]),
-            new POIAndQuery([new POIPhrase('amenity', '~', 'bus_station|ferry_terminal|airport', false)]),
-            new POIAndQuery([new POIPhrase('public_transport', '~', 'station|stop_position|platform', false)]),
-        ]),
-        'train',
-        'public transit'
-    )
-)
-const tourismSearch = new PoiSearch(
-    new AddressParseResult(
-        '',
-        new POIQuery([new POIAndQuery([new POIPhrase('tourism', '=', '*', false)])]),
-        'luggage',
-        'tourism'
-    )
-)
 
 export default function App() {
     const [settings, setSettings] = useState(getSettingsStore().state)
@@ -241,42 +122,48 @@ export default function App() {
 
     const fetchPoiData = async (poi_type: any) => {
         try {
-            const response = await axios.get(`/api/poi`, {
-                params: { poi_type: poi_type },
-            })
-            const data = response.data
-            console.log(data)
+            const response = await fetch(`${BACKEND_SERVER_URL}/poi?poi_type=${poi_type}`);
+            console.log(response)
+            const data = await response.json();
+            console.log(data);
         } catch (error) {
-            console.error('Error fetching POI data:', error)
+            console.error("Error fetching POI data:", error);
         }
-    }
+    };
+
+    
 
     const isSmallScreen = useMediaQuery({ query: '(max-width: 44rem)' })
     return (
         <SettingsContext.Provider value={settings}>
             <div className={styles.appWrapper}>
                 <div className={styles.iconRow}>
-                    <button className={styles.iconButton} onClick={() => foodSearch.search()}>
-                        <FaUtensils /> <span>Ăn uống</span>
+                    <button
+                        className={styles.iconButton}
+                        onClick={async () => {
+                            await fetchPoiData("restaurant");
+                        }}
+                    >
+                        <FaUtensils /> <span>Nhà hàng</span>
                     </button>
 
-                    <button className={styles.iconButton} onClick={() => hospitalSearch.search()}>
-                        <FaHospital /> <span>Y tế</span>
+                    <button className={styles.iconButton} onClick={() => { fetchPoiData("hospital"); }}>
+                        <FaHospital /> <span>Bệnh viện</span>
                     </button>
-                    <button className={styles.iconButton} onClick={() => educationSearch.search()}>
-                        <FaSchool /> <span>Giáo dục</span>
+                    <button className={styles.iconButton} onClick={() => { fetchPoiData("school"); }}>
+                        <FaSchool /> <span>Trường học</span>
                     </button>
-                    <button className={styles.iconButton} onClick={() => gasStationSearch.search()}>
+                    <button className={styles.iconButton} onClick={() => { fetchPoiData("gas"); }}>
                         <FaGasPump /> <span>Trạm xăng</span>
                     </button>
-                    <button className={styles.iconButton} onClick={() => atmSearch.search()}>
+                    <button className={styles.iconButton} onClick={() => { fetchPoiData("atm"); }}>
                         <FaMoneyBill /> <span>ATM</span>
                     </button>
-                    <button className={styles.iconButton} onClick={() => publicTransitSearch.search()}>
+                    <button className={styles.iconButton} onClick={() => { fetchPoiData("bus stop"); }}>
                         <FaBus /> <span>Phương tiện công cộng</span>
                     </button>
-                    <button className={styles.iconButton} onClick={() => tourismSearch.search()}>
-                        <FaLandmark /> <span>Du lịch</span>
+                    <button className={styles.iconButton} onClick={() => { fetchPoiData("tourist"); }}>
+                        <FaLandmark /> <span>Điểm tham quan</span>
                     </button>
                 </div>
                 <MapPopups
@@ -324,99 +211,74 @@ interface LayoutProps {
 }
 
 function LargeScreenLayout({ query, route, map, error, mapOptions, encodedValues, drawAreas }: LayoutProps) {
-    const [showSidebar, setShowSidebar] = useState(false)
-    const [showCustomModelBox, setShowCustomModelBox] = useState(false)
-
-    const [showTargetIcons, setShowTargetIcons] = useState(true)
-    const [moveStartIndex, onMoveStartSelect] = useState(-1)
-    const [dropPreviewIndex, onDropPreviewSelect] = useState(-1)
+    const [showSidebar, setShowSidebar] = useState(true);
+    const [showCustomModelBox, setShowCustomModelBox] = useState(false);
+    const [viewMode, setViewMode] = useState(0); // State for view mode
 
     return (
         <>
             {showSidebar ? (
                 <div className={styles.sidebar}>
                     <div className={styles.sidebarContent} id={SIDEBAR_CONTENT_ID}>
-                        <PlainButton onClick={() => setShowSidebar(!showSidebar)} className={styles.sidebarCloseButton}>
-                            <Cross />
-                        </PlainButton>
-                        <RoutingProfiles
-                            routingProfiles={query.profiles}
-                            selectedProfile={query.routingProfile}
-                            showCustomModelBox={showCustomModelBox}
-                            toggleCustomModelBox={() => setShowCustomModelBox(!showCustomModelBox)}
-                            customModelBoxEnabled={query.customModelEnabled}
-                        />
-                        {showCustomModelBox && (
-                            <CustomModelBox
-                                customModelEnabled={query.customModelEnabled}
-                                encodedValues={encodedValues}
-                                customModelStr={query.customModelStr}
-                                queryOngoing={query.currentRequest.subRequests[0]?.state === RequestState.SENT}
-                                drawAreas={drawAreas}
+                    {viewMode === 1 && (
+                            <RoutingProfiles
+                                routingProfiles={query.profiles}
+                                selectedProfile={query.routingProfile}
+                                showCustomModelBox={showCustomModelBox}
+                                toggleCustomModelBox={() => setShowCustomModelBox(!showCustomModelBox)}
+                                customModelBoxEnabled={query.customModelEnabled}
                             />
                         )}
-                        <Search points={query.queryPoints} map={map} />
-                        <div>{!error.isDismissed && <ErrorMessage error={error} />}</div>
-                        <RoutingResults
-                            info={route.routingResult.info}
-                            paths={route.routingResult.paths}
-                            selectedPath={route.selectedPath}
-                            currentRequest={query.currentRequest}
-                            profile={query.routingProfile.name}
-                        />
-                        <div>
-                            <PoweredBy />
-                        </div>
+                    <div className={styles.rowContainer}>
+                        <PlainButton
+                            onClick={() => setShowSidebar(false)}
+                            className={styles.sidebarCloseButton}
+                        >
+                            <FontAwesomeIcon icon={faBars} />
+                        </PlainButton>
+                        <Search points={query.queryPoints} map={map} viewMode={viewMode} />
+
+                        <PlainButton
+                            className={styles.toggleViewButton}
+                            onClick={() => setViewMode(viewMode === 0 ? 1 : 0)}
+                        >
+                            <FontAwesomeIcon
+                                icon={viewMode === 0 ? faDiamondTurnRight : faClose}
+                                style={{ color: '#2c8ff4', fontSize: '24px', margin: '10px' }}
+                            />
+                        </PlainButton>
+
+                       
                     </div>
+                   
+                    {showCustomModelBox && (
+                        <CustomModelBox
+                            customModelEnabled={query.customModelEnabled}
+                            encodedValues={encodedValues}
+                            customModelStr={query.customModelStr}
+                            queryOngoing={query.currentRequest.subRequests[0]?.state === RequestState.SENT}
+                            drawAreas={drawAreas}
+                        />
+                    )}
+
+
+                    <div>{!error.isDismissed && <ErrorMessage error={error} />}</div>
+
+                    <RoutingResults
+                        info={route.routingResult.info}
+                        paths={route.routingResult.paths}
+                        selectedPath={route.selectedPath}
+                        currentRequest={query.currentRequest}
+                        profile={query.routingProfile.name}
+                    />
+                </div>
+
                 </div>
             ) : (
-                <div className={styles.sidebar}>
-                    <div className={styles.sidebarContent} id={SIDEBAR_CONTENT_ID}>
-                        <div className={styles.container}>
-                            <PlainButton
-                                onClick={() => setShowSidebar(!showSidebar)}
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    backgroundColor: '#007bff',
-                                    border: 'none',
-                                    fontSize: '24px',
-                                    width: '30px',
-                                    height: '30px',
-                                    borderRadius: '50%',
-                                    color: '#fff',
-                                    cursor: 'pointer',
-                                }}
-                            >
-                                <IoArrowRedoCircleSharp
-                                    style={{
-                                        fontSize: '32px',
-                                    }}
-                                />
-                            </PlainButton>
-                        </div>
-                        <div className={styles.searchBox}>
-                            <SearchBox
-                                key={query.queryPoints[0].id}
-                                index={0}
-                                points={query.queryPoints}
-                                deletable={query.queryPoints.length > 2}
-                                onChange={() => {
-                                    Dispatcher.dispatch(new ClearRoute())
-                                    Dispatcher.dispatch(new InvalidatePoint(query.queryPoints[0]))
-                                }}
-                                showTargetIcons={showTargetIcons}
-                                moveStartIndex={moveStartIndex}
-                                onMoveStartSelect={(index, showTarget) => {
-                                    setShowTargetIcons(showTarget)
-                                }}
-                                dropPreviewIndex={dropPreviewIndex}
-                                onDropPreviewSelect={onDropPreviewSelect}
-                                map={map}
-                            />
-                        </div>
-                    </div>
+                <div className={styles.sidebarWhenClosed} onClick={() => setShowSidebar(true)}>
+                    <PlainButton className={styles.sidebarOpenButton}>
+                        <Menu />
+                    </PlainButton>
                 </div>
             )}
             <div className={styles.popupContainer} id={POPUP_CONTAINER_ID} />
@@ -427,13 +289,17 @@ function LargeScreenLayout({ query, route, map, error, mapOptions, encodedValues
             <div className={styles.map}>
                 <MapComponent map={map} />
             </div>
-
             <div className={styles.pathDetails}>
                 <PathDetails selectedPath={route.selectedPath} />
-            </div>
+            </div>  
+
+            
         </>
-    )
+        
+    );
 }
+
+
 
 function SmallScreenLayout({ query, route, map, error, mapOptions, encodedValues, drawAreas }: LayoutProps) {
     return (
@@ -468,151 +334,7 @@ function SmallScreenLayout({ query, route, map, error, mapOptions, encodedValues
                 />
             </div>
 
-            <div className={styles.smallScreenPoweredBy}>
-                <PoweredBy />
-            </div>
-        </>
-    )
-}
-
-const SearchBox = ({
-    index,
-    points,
-    onChange,
-    deletable,
-    moveStartIndex,
-    showTargetIcons,
-    onMoveStartSelect,
-    dropPreviewIndex,
-    onDropPreviewSelect,
-    map,
-}: {
-    index: number
-    points: QueryPoint[]
-    deletable: boolean
-    onChange: (value: string) => void
-    moveStartIndex: number
-    showTargetIcons: boolean
-    onMoveStartSelect: (index: number, showTargetIcon: boolean) => void
-    dropPreviewIndex: number
-    onDropPreviewSelect: (index: number) => void
-    map: Map
-}) => {
-    const point = points[index]
-
-    // With this ref and tabIndex=-1 we ensure that the first 'TAB' gives the focus the first input but the marker won't be included in the TAB sequence, #194
-    const myMarkerRef = useRef<HTMLDivElement>(null)
-
-    useEffect(() => {
-        if (index == 0) myMarkerRef.current?.focus()
-    }, [])
-
-    function onClickOrDrop() {
-        onDropPreviewSelect(-1)
-        const newIndex = moveStartIndex < index ? index + 1 : index
-        Dispatcher.dispatch(new MovePoint(points[moveStartIndex], newIndex))
-        onMoveStartSelect(index, false) // temporarily hide target icons
-        setTimeout(() => {
-            onMoveStartSelect(-1, true)
-        }, 1000)
-    }
-
-    return (
-        <>
-            {(moveStartIndex < 0 || moveStartIndex == index) && (
-                <div
-                    ref={myMarkerRef}
-                    tabIndex={-1}
-                    title={tr('drag_to_reorder')}
-                    className={styles.markerContainer}
-                    draggable
-                    onDragStart={() => {
-                        // do not set to dropPreview to -1 if we start dragging when already selected
-                        if (moveStartIndex != index) {
-                            onMoveStartSelect(index, true)
-                            onDropPreviewSelect(-1)
-                        }
-                    }}
-                    onDragEnd={() => {
-                        onMoveStartSelect(-1, true)
-                        onDropPreviewSelect(-1)
-                    }}
-                    onClick={() => {
-                        if (moveStartIndex == index) {
-                            onMoveStartSelect(-1, true)
-                            onDropPreviewSelect(-1)
-                        } else onMoveStartSelect(index, true)
-                    }}
-                >
-                    <MarkerComponent
-                        number={index > 0 && index + 1 < points.length ? '' + index : undefined}
-                        cursor="ns-resize"
-                        color={moveStartIndex >= 0 ? 'gray' : point.color}
-                    />
-                </div>
-            )}
-            {moveStartIndex >= 0 && moveStartIndex != index && (
-                <PlainButton
-                    title={tr('click to move selected input here')}
-                    className={[
-                        showTargetIcons ? '' : styles.hide,
-                        styles.markerTarget,
-                        dropPreviewIndex >= 0 && dropPreviewIndex == index ? styles.dropPreview : '',
-                    ].join(' ')}
-                    style={moveStartIndex > index ? { marginTop: '-2.4rem' } : { marginBottom: '-2.4rem' }}
-                    onDragOver={e => {
-                        e.preventDefault() // without this, the onDrop hook isn't called
-                        onDropPreviewSelect(index)
-                    }}
-                    onDragLeave={() => onDropPreviewSelect(-1)}
-                    onDrop={onClickOrDrop}
-                    onClick={onClickOrDrop}
-                ></PlainButton>
-            )}
-
-            <div className={styles.searchBoxInput}>
-                <AddressInput
-                    map={map}
-                    moveStartIndex={moveStartIndex}
-                    dropPreviewIndex={dropPreviewIndex}
-                    index={index}
-                    point={point}
-                    points={points}
-                    onCancel={() => console.log('cancel')}
-                    onAddressSelected={(queryText, coordinate) => {
-                        const initCount = points.filter(p => p.isInitialized).length
-                        if (coordinate && initCount != points.length)
-                            Dispatcher.dispatch(new SetBBox(getBBoxFromCoord(coordinate)))
-
-                        Dispatcher.dispatch(
-                            new SetPoint(
-                                {
-                                    ...point,
-                                    isInitialized: !!coordinate,
-                                    queryText: queryText,
-                                    coordinate: coordinate ? coordinate : point.coordinate,
-                                },
-                                initCount > 0
-                            )
-                        )
-                    }}
-                    clearDragDrop={() => {
-                        onMoveStartSelect(-1, true)
-                        onDropPreviewSelect(-1)
-                    }}
-                    onChange={onChange}
-                />
-            </div>
-            {deletable && (
-                <PlainButton
-                    title={tr('delete_from_route')}
-                    onClick={() => {
-                        Dispatcher.dispatch(new RemovePoint(point))
-                        onMoveStartSelect(-1, true)
-                    }}
-                    className={styles.removeSearchBox}
-                ></PlainButton>
-            )}
+            
         </>
     )
 }
