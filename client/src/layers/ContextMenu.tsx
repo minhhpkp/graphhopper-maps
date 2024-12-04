@@ -69,7 +69,6 @@ export default function ContextMenu({ map, route, queryPoints }: ContextMenuProp
             setLoading(false)
             console.log('Fetched POI data:', data)
 
-            // Cập nhật nội dung popup nhỏ với thông tin gọn gàng
             if (popupRef.current) {
                 popupRef.current.innerHTML = `
                 <style>
@@ -375,27 +374,114 @@ export default function ContextMenu({ map, route, queryPoints }: ContextMenuProp
         markerElement.innerHTML = markerSvg;
         markerElement.style.cursor = 'pointer';
         markerElement.setAttribute('role', 'marker'); // Add a role attribute to identify markers
-    
-        // Add a click event to the marker to display a popup
-        markerElement.addEventListener('click', () => {
+
+        markerElement.addEventListener('click', async () => {
+            // Đặt nội dung tạm thời cho popup
             if (popupRef.current) {
                 popupRef.current.innerHTML = '<p>Đang tải dữ liệu...</p>';
             }
-            
-            // Remove the current popup if it exists
+        
+            // Xóa popup hiện tại nếu có
             if (currentPopupRef.current) {
                 map.removeOverlay(currentPopupRef.current);
             }
-    
+        
+            // Tạo một popup tạm thời
             const popupOverlay = new Overlay({
                 element: popupRef.current!,
                 position: coordinate,
                 positioning: 'bottom-center',
-                offset: [0, -35], // Adjust position so it doesn't block the marker
+                offset: [0, -35], // Điều chỉnh vị trí popup để không che marker
             });
             map.addOverlay(popupOverlay);
             currentPopupRef.current = popupOverlay;
+
+            const controller = new AbortController();
+            abortControllerRef.current = controller;
+        
+            // Gọi API để lấy thông tin của địa điểm
+            try {
+                const response = await axios.get(`/api/poi/find-closest-place`, {
+                    params: { lat: lonLat[1], lng: lonLat[0] },
+                    signal: controller.signal,
+                })
+                const data = await response.data;
+        
+                // Cập nhật lại nội dung của popup với thông tin từ API
+                if (popupRef.current) {
+                    popupRef.current.innerHTML = `
+                    <style>
+                        .popup-small {
+                            display: flex;
+                            flex-direction: column;
+                            padding: 10px;
+                            border-radius: 10px;
+                            background-color: #ffffff;
+                            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                            font-family: 'Arial, sans-serif';
+                            max-width: 250px;
+                            border: 1px solid #2c8ff4; /* Updated border to primary color */
+                            transition: all 0.3s ease-in-out;
+                        }
+                        .popup-title {
+                            font-size: 16px;
+                            color: #2c8ff4; /* Updated title color to primary */
+                            font-weight: bold;
+                            margin-bottom: 5px;
+                        }
+                        .popup-address {
+                            font-size: 14px;
+                            color: #666; /* Neutral color for the address */
+                            margin-bottom: 10px;
+                        }
+                        .details-button {
+                            display: inline-block;
+                            background-color: #2c8ff4; /* Primary color for button */
+                            color: #fff; /* White text for contrast */
+                            border: none;
+                            padding: 5px 10px;
+                            border-radius: 5px;
+                            cursor: pointer;
+                            font-size: 14px;
+                            text-align: center;
+                            transition: all 0.2s ease-in-out;
+                        }
+                        .details-button:hover {
+                            background-color: #1b6dc2; /* Slightly darker shade on hover */
+                            transform: scale(1.05); /* Slight zoom effect */
+                        }
+                        .details-button:active {
+                            background-color: #144c91; /* Even darker shade when active */
+                            transform: scale(0.98); /* Slight shrink effect */
+                        }
+                    </style>
+                    <div class="popup-small">
+                        <span class="popup-title">${data.en_title || 'N/A'}</span>
+                        <span class="popup-address">${data.address?.join(', ') || 'N/A'}</span>
+                        <button id="details-button" class="details-button">Chi tiết</button>
+                    </div>
+                `;
+    
+        
+                    // Thêm sự kiện click cho nút "Chi tiết"
+                    setTimeout(() => {
+                        const detailsButton = document.getElementById('details-button');
+                        if (detailsButton) {
+                            detailsButton.onclick = event => {
+                                event.stopPropagation(); // Ngăn click lan đến map
+                                showDetailsPopup(data);
+                            };
+                        }
+                    }, 0);
+                }
+            } catch (error) {
+                console.error("Error fetching POI data:", error);
+                if (popupRef.current) {
+                    popupRef.current.innerHTML = '<p>Không thể tải dữ liệu địa điểm.</p>';
+                }
+            }
         });
+        
     
         const markerOverlay = new Overlay({
             element: markerElement,
