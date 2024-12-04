@@ -17,7 +17,6 @@ import MapOptions from '@/map/MapOptions'
 import MobileSidebar from '@/sidebar/MobileSidebar'
 import { useMediaQuery } from 'react-responsive'
 import RoutingResults from '@/sidebar/RoutingResults'
-import PoweredBy from '@/sidebar/PoweredBy'
 import { QueryStoreState, RequestState } from '@/stores/QueryStore'
 import { RouteStoreState } from '@/stores/RouteStore'
 import { MapOptionsStoreState } from '@/stores/MapOptionsStore'
@@ -38,7 +37,6 @@ import useMapBorderLayer from '@/layers/UseMapBorderLayer'
 import RoutingProfiles from '@/sidebar/search/routingProfiles/RoutingProfiles'
 import MapPopups from '@/map/MapPopups'
 import Menu from '@/sidebar/menu.svg'
-import Cross from '@/sidebar/times-solid.svg'
 import PlainButton from '@/PlainButton'
 import useAreasLayer from '@/layers/UseAreasLayer'
 import useExternalMVTLayer from '@/layers/UseExternalMVTLayer'
@@ -46,11 +44,123 @@ import LocationButton from '@/map/LocationButton'
 import { SettingsContext } from '@/contexts/SettingsContext'
 import usePOIsLayer from '@/layers/UsePOIsLayer'
 import { FaUtensils, FaHospital, FaSchool, FaGasPump, FaMoneyBill, FaBus, FaLandmark } from 'react-icons/fa'
-import { BACKEND_SERVER_URL } from './settings'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowLeft, faBars, faClose, faDiamondTurnRight, faMapSigns } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faBars, faClose, faDiamondTurnRight } from '@fortawesome/free-solid-svg-icons'
+import { handlePoiSearch, ReverseGeocoder } from './sidebar/search/AddressInput'
+import { AddressParseResult, POIAndQuery, POIPhrase, POIQuery } from './pois/AddressParseResult'
+import { getApi } from './api/Api'
 export const POPUP_CONTAINER_ID = 'popup-container'
 export const SIDEBAR_CONTENT_ID = 'sidebar-content'
+
+const queryPoint = {
+    isInitialized: false,
+    queryText: '',
+    coordinate: {
+        lat: 0,
+        lng: 0,
+    },
+    id: 0,
+    color: '#7cb342',
+    type: 0,
+}
+class PoiSearch {
+    private readonly addressParseResult: AddressParseResult
+    constructor(addressParseResult: AddressParseResult) {
+        this.addressParseResult = addressParseResult
+    }
+    search() {
+        const poiSearch = new ReverseGeocoder(getApi(), queryPoint, AddressParseResult.handleGeocodingResponse)
+        handlePoiSearch(poiSearch, this.addressParseResult, getMap())
+    }
+}
+const foodSearch = new PoiSearch(
+    new AddressParseResult(
+        '',
+        new POIQuery([
+            new POIAndQuery([
+                new POIPhrase('amenity', '~', 'restaurant|food_court|cafe|fast_food|pub|bar|street_vendor', false),
+            ]),
+        ]),
+        'restaurant',
+        'restaurants'
+    )
+)
+const hospitalSearch = new PoiSearch(
+    new AddressParseResult(
+        '',
+        new POIQuery([
+            new POIAndQuery([
+                new POIPhrase(
+                    'amenity',
+                    '~',
+                    'hospital|clinic|doctors|pharmacy|dentist|nursing_home|healthcare',
+                    false
+                ),
+            ]),
+            new POIAndQuery([
+                new POIPhrase('amenity', '=', 'doctors', false),
+                new POIPhrase('healthcare', '=', 'doctor', false),
+            ]),
+        ]),
+        'local_hospital',
+        'hospitals'
+    )
+)
+const educationSearch = new PoiSearch(
+    new AddressParseResult(
+        '',
+        new POIQuery([
+            new POIAndQuery([new POIPhrase('amenity', '~', 'school|college|university|kindergarten|library', false)]),
+        ]),
+        'school',
+        'education'
+    )
+)
+const gasStationSearch = new PoiSearch(
+    new AddressParseResult(
+        '',
+        new POIQuery([new POIAndQuery([new POIPhrase('amenity', '=', 'fuel', false)])]),
+        'local_gas_station',
+        'gas stations'
+    )
+)
+const atmSearch = new PoiSearch(
+    new AddressParseResult(
+        '',
+        new POIQuery([
+            new POIAndQuery([new POIPhrase('amenity', '=', 'atm', false)]),
+            new POIAndQuery([new POIPhrase('amenity', '=', 'bank', false)]),
+        ]),
+        'local_atm',
+        'atm'
+    )
+)
+const publicTransitSearch = new PoiSearch(
+    new AddressParseResult(
+        '',
+        new POIQuery([
+            new POIAndQuery([
+                new POIPhrase('aeroway', '=', 'aerodrome', false),
+                new POIPhrase('landuse', '!=', 'military', false),
+                new POIPhrase('military', '!~', '.*', false),
+            ]),
+            new POIAndQuery([new POIPhrase('highway', '=', 'bus_stop', false)]),
+            new POIAndQuery([new POIPhrase('railway', '~', 'halt|station|subway_station', false)]),
+            new POIAndQuery([new POIPhrase('amenity', '~', 'bus_station|ferry_terminal|airport', false)]),
+            new POIAndQuery([new POIPhrase('public_transport', '~', 'station|stop_position|platform', false)]),
+        ]),
+        'train',
+        'public transit'
+    )
+)
+const tourismSearch = new PoiSearch(
+    new AddressParseResult(
+        '',
+        new POIQuery([new POIAndQuery([new POIPhrase('tourism', '=', '*', false)])]),
+        'luggage',
+        'tourism'
+    )
+)
 
 export default function App() {
     const [settings, setSettings] = useState(getSettingsStore().state)
@@ -120,50 +230,32 @@ export default function App() {
     usePathDetailsLayer(map, pathDetails)
     usePOIsLayer(map, pois)
 
-    const fetchPoiData = async (poi_type: any) => {
-        try {
-            const response = await fetch(`${BACKEND_SERVER_URL}/poi?poi_type=${poi_type}`);
-            console.log(response)
-            const data = await response.json();
-            console.log(data);
-        } catch (error) {
-            console.error("Error fetching POI data:", error);
-        }
-    };
-
-    
-
     const isSmallScreen = useMediaQuery({ query: '(max-width: 44rem)' })
     return (
         <SettingsContext.Provider value={settings}>
             <div className={styles.appWrapper}>
                 <div className={styles.iconRow}>
-                    <button
-                        className={styles.iconButton}
-                        onClick={async () => {
-                            await fetchPoiData("restaurant");
-                        }}
-                    >
-                        <FaUtensils /> <span>Nhà hàng</span>
+                    <button className={styles.iconButton} onClick={() => foodSearch.search()}>
+                        <FaUtensils /> <span>Ăn uống</span>
                     </button>
 
-                    <button className={styles.iconButton} onClick={() => { fetchPoiData("hospital"); }}>
-                        <FaHospital /> <span>Bệnh viện</span>
+                    <button className={styles.iconButton} onClick={() => hospitalSearch.search()}>
+                        <FaHospital /> <span>Sức khỏe</span>
                     </button>
-                    <button className={styles.iconButton} onClick={() => { fetchPoiData("school"); }}>
+                    <button className={styles.iconButton} onClick={() => educationSearch.search()}>
                         <FaSchool /> <span>Trường học</span>
                     </button>
-                    <button className={styles.iconButton} onClick={() => { fetchPoiData("gas"); }}>
+                    <button className={styles.iconButton} onClick={() => gasStationSearch.search()}>
                         <FaGasPump /> <span>Trạm xăng</span>
                     </button>
-                    <button className={styles.iconButton} onClick={() => { fetchPoiData("atm"); }}>
+                    <button className={styles.iconButton} onClick={() => atmSearch.search()}>
                         <FaMoneyBill /> <span>ATM</span>
                     </button>
-                    <button className={styles.iconButton} onClick={() => { fetchPoiData("bus stop"); }}>
+                    <button className={styles.iconButton} onClick={() => publicTransitSearch.search()}>
                         <FaBus /> <span>Phương tiện công cộng</span>
                     </button>
-                    <button className={styles.iconButton} onClick={() => { fetchPoiData("tourist"); }}>
-                        <FaLandmark /> <span>Điểm tham quan</span>
+                    <button className={styles.iconButton} onClick={() => tourismSearch.search()}>
+                        <FaLandmark /> <span>Du lịch</span>
                     </button>
                 </div>
                 <MapPopups
@@ -211,16 +303,16 @@ interface LayoutProps {
 }
 
 function LargeScreenLayout({ query, route, map, error, mapOptions, encodedValues, drawAreas }: LayoutProps) {
-    const [showSidebar, setShowSidebar] = useState(true);
-    const [showCustomModelBox, setShowCustomModelBox] = useState(false);
-    const [viewMode, setViewMode] = useState(0); // State for view mode
+    const [showSidebar, setShowSidebar] = useState(true)
+    const [showCustomModelBox, setShowCustomModelBox] = useState(false)
+    const [viewMode, setViewMode] = useState(0) // State for view mode
 
     return (
         <>
             {showSidebar ? (
                 <div className={styles.sidebar}>
                     <div className={styles.sidebarContent} id={SIDEBAR_CONTENT_ID}>
-                    {viewMode === 1 && (
+                        {viewMode === 1 && (
                             <RoutingProfiles
                                 routingProfiles={query.profiles}
                                 selectedProfile={query.routingProfile}
@@ -229,50 +321,43 @@ function LargeScreenLayout({ query, route, map, error, mapOptions, encodedValues
                                 customModelBoxEnabled={query.customModelEnabled}
                             />
                         )}
-                    <div className={styles.rowContainer}>
-                        <PlainButton
-                            onClick={() => setShowSidebar(false)}
-                            className={styles.sidebarCloseButton}
-                        >
-                            <FontAwesomeIcon icon={faBars} />
-                        </PlainButton>
-                        <Search points={query.queryPoints} map={map} viewMode={viewMode} />
+                        <div className={styles.rowContainer}>
+                            <PlainButton onClick={() => setShowSidebar(false)} className={styles.sidebarCloseButton}>
+                                <FontAwesomeIcon icon={faBars} />
+                            </PlainButton>
+                            <Search points={query.queryPoints} map={map} viewMode={viewMode} />
 
-                        <PlainButton
-                            className={styles.toggleViewButton}
-                            onClick={() => setViewMode(viewMode === 0 ? 1 : 0)}
-                        >
-                            <FontAwesomeIcon
-                                icon={viewMode === 0 ? faDiamondTurnRight : faClose}
-                                style={{ color: '#2c8ff4', fontSize: '24px', margin: '10px' }}
+                            <PlainButton
+                                className={styles.toggleViewButton}
+                                onClick={() => setViewMode(viewMode === 0 ? 1 : 0)}
+                            >
+                                <FontAwesomeIcon
+                                    icon={viewMode === 0 ? faDiamondTurnRight : faClose}
+                                    style={{ color: '#2c8ff4', fontSize: '24px', margin: '10px' }}
+                                />
+                            </PlainButton>
+                        </div>
+
+                        {showCustomModelBox && (
+                            <CustomModelBox
+                                customModelEnabled={query.customModelEnabled}
+                                encodedValues={encodedValues}
+                                customModelStr={query.customModelStr}
+                                queryOngoing={query.currentRequest.subRequests[0]?.state === RequestState.SENT}
+                                drawAreas={drawAreas}
                             />
-                        </PlainButton>
+                        )}
 
-                       
-                    </div>
-                   
-                    {showCustomModelBox && (
-                        <CustomModelBox
-                            customModelEnabled={query.customModelEnabled}
-                            encodedValues={encodedValues}
-                            customModelStr={query.customModelStr}
-                            queryOngoing={query.currentRequest.subRequests[0]?.state === RequestState.SENT}
-                            drawAreas={drawAreas}
+                        <div>{!error.isDismissed && <ErrorMessage error={error} />}</div>
+
+                        <RoutingResults
+                            info={route.routingResult.info}
+                            paths={route.routingResult.paths}
+                            selectedPath={route.selectedPath}
+                            currentRequest={query.currentRequest}
+                            profile={query.routingProfile.name}
                         />
-                    )}
-
-
-                    <div>{!error.isDismissed && <ErrorMessage error={error} />}</div>
-
-                    <RoutingResults
-                        info={route.routingResult.info}
-                        paths={route.routingResult.paths}
-                        selectedPath={route.selectedPath}
-                        currentRequest={query.currentRequest}
-                        profile={query.routingProfile.name}
-                    />
-                </div>
-
+                    </div>
                 </div>
             ) : (
                 <div className={styles.sidebarWhenClosed} onClick={() => setShowSidebar(true)}>
@@ -291,15 +376,10 @@ function LargeScreenLayout({ query, route, map, error, mapOptions, encodedValues
             </div>
             <div className={styles.pathDetails}>
                 <PathDetails selectedPath={route.selectedPath} />
-            </div>  
-
-            
+            </div>
         </>
-        
-    );
+    )
 }
-
-
 
 function SmallScreenLayout({ query, route, map, error, mapOptions, encodedValues, drawAreas }: LayoutProps) {
     return (
@@ -333,8 +413,6 @@ function SmallScreenLayout({ query, route, map, error, mapOptions, encodedValues
                     profile={query.routingProfile.name}
                 />
             </div>
-
-            
         </>
     )
 }

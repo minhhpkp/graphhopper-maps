@@ -55,15 +55,16 @@ export default function AddressInput(props: AddressInputProps) {
     const biasCoord = { lng: lonlat[0], lat: lonlat[1] }
 
     // Placeholder text logic, incorporating both original implementations
-    const placeholderText = props.state === 0
-        ? 'Tìm kiếm vị trí trên bản đồ' // Vietnamese for "Search for a location on the map"
-        : tr(
-            props.point.type === QueryPointType.From
-                ? 'from_hint'
-                : props.point.type === QueryPointType.To
-                ? 'to_hint'
-                : 'via_hint'
-          )
+    const placeholderText =
+        props.state === 0
+            ? 'Tìm kiếm vị trí trên bản đồ' // Vietnamese for "Search for a location on the map"
+            : tr(
+                  props.point.type === QueryPointType.From
+                      ? 'from_hint'
+                      : props.point.type === QueryPointType.To
+                      ? 'to_hint'
+                      : 'via_hint'
+              )
 
     const [geocoder] = useState(
         new Geocoder(getApi(), (query, provider, hits) => {
@@ -92,7 +93,7 @@ export default function AddressInput(props: AddressInputProps) {
 
     // if item is selected we need to clear the autocompletion list
     useEffect(() => setAutocompleteItems([]), [props.point])
-    
+
     // if no items but input is selected show current location item
     useEffect(() => {
         if (hasFocus && text.length === 0 && autocompleteItems.length === 0)
@@ -202,7 +203,7 @@ export default function AddressInput(props: AddressInputProps) {
                         <ArrowBack />
                     </PlainButton>
                 )}
-                
+
                 <input
                     style={props.moveStartIndex === props.index ? { borderWidth: '2px', margin: '-1px' } : {}}
                     className={styles.input}
@@ -211,7 +212,7 @@ export default function AddressInput(props: AddressInputProps) {
                     autoComplete="off"
                     value={text}
                     placeholder={placeholderText}
-                    onChange={(e) => {
+                    onChange={e => {
                         const query = e.target.value
                         setText(query)
                         const coordinate = textToCoordinate(query)
@@ -275,7 +276,7 @@ export default function AddressInput(props: AddressInputProps) {
 }
 
 // Utility functions
-function handlePoiSearch(poiSearch: ReverseGeocoder, result: AddressParseResult, map: Map) {
+export function handlePoiSearch(poiSearch: ReverseGeocoder, result: AddressParseResult, map: Map) {
     if (!result.hasPOIs()) return
 
     const origExtent = map.getView().calculateExtent(map.getSize())
