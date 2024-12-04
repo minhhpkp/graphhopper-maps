@@ -15,6 +15,9 @@
         "test": "jest"
     },
     "dependencies": {
+        "@fortawesome/fontawesome-svg-core": "^6.7.1",
+        "@fortawesome/free-solid-svg-icons": "^6.7.1",
+        "@fortawesome/react-fontawesome": "^0.2.2",
         "axios": "^1.7.8",
         "custom-model-editor": "github:graphhopper/custom-model-editor#3a46b6981d170b7eb70d621bbb92caed149e5a97",
         "dotenv": "^16.4.5",
@@ -30,6 +33,7 @@
         "react-responsive": "^9.0.0"
     },
     "devDependencies": {
+        "@types/axios": "^0.14.4",
         "@svgr/webpack": "^8.0.1",
         "@types/geojson": "^7946.0.10",
         "@types/jest": "^29.4.1",
