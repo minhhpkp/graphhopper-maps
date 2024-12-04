@@ -8,64 +8,103 @@ import AddIcon from './plus-circle-solid.svg'
 import TargetIcon from './send.svg'
 import PlainButton from '@/PlainButton'
 import { Map } from 'ol'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import AddressInput from '@/sidebar/search/AddressInput'
 import { MarkerComponent } from '@/map/Marker'
 import { tr } from '@/translation/Translation'
 import SettingsBox from '@/sidebar/SettingsBox'
+import { faSearch } from '@fortawesome/free-solid-svg-icons'
 
-export default function Search({ points, map }: { points: QueryPoint[]; map: Map }) {
-    const [showSettings, setShowSettings] = useState(false)
-    const [showTargetIcons, setShowTargetIcons] = useState(true)
-    const [moveStartIndex, onMoveStartSelect] = useState(-1)
-    const [dropPreviewIndex, onDropPreviewSelect] = useState(-1)
+export default function Search({
+    points,
+    map,
+    viewMode,
+}: {
+    points: QueryPoint[];
+    map: Map;
+    viewMode: number; // Externally controlled view mode
+}) {
+    const [showSettings, setShowSettings] = useState(false);
+    const [showTargetIcons, setShowTargetIcons] = useState(true);
+    const [moveStartIndex, onMoveStartSelect] = useState(-1);
+    const [dropPreviewIndex, onDropPreviewSelect] = useState(-1);
 
     return (
         <div className={styles.searchBoxParent}>
             <div className={styles.searchBox}>
-                {points.map((point, index) => (
-                    <SearchBox
-                        key={point.id}
-                        index={index}
-                        points={points}
-                        deletable={points.length > 2}
-                        onChange={() => {
-                            Dispatcher.dispatch(new ClearRoute())
-                            Dispatcher.dispatch(new InvalidatePoint(point))
-                        }}
-                        showTargetIcons={showTargetIcons}
-                        moveStartIndex={moveStartIndex}
-                        onMoveStartSelect={(index, showTarget) => {
-                            onMoveStartSelect(index)
-                            setShowTargetIcons(showTarget)
-                        }}
-                        dropPreviewIndex={dropPreviewIndex}
-                        onDropPreviewSelect={onDropPreviewSelect}
-                        map={map}
-                    />
-                ))}
+                {viewMode === 0
+                    ? points.slice(0, 1).map((point, index) => (
+                          <SearchBox
+                              key={point.id}
+                              index={index}
+                              points={points}
+                              deletable={false} // Disable deletion in viewMode 0
+                              onChange={() => {
+                                  Dispatcher.dispatch(new ClearRoute());
+                                  Dispatcher.dispatch(new InvalidatePoint(point));
+                              }}
+                              showTargetIcons={false}
+                              moveStartIndex={moveStartIndex}
+                              onMoveStartSelect={() => {}}
+                              dropPreviewIndex={dropPreviewIndex}
+                              onDropPreviewSelect={() => {}}
+                              map={map}
+                              state={viewMode} // Pass state (viewMode)
+                          />
+                      ))
+                    : points.map((point, index) => (
+                          <SearchBox
+                              key={point.id}
+                              index={index}
+                              points={points}
+                              deletable={points.length > 2}
+                              onChange={() => {
+                                  Dispatcher.dispatch(new ClearRoute());
+                                  Dispatcher.dispatch(new InvalidatePoint(point));
+                              }}
+                              showTargetIcons={showTargetIcons}
+                              moveStartIndex={moveStartIndex}
+                              onMoveStartSelect={(index, showTarget) => {
+                                  onMoveStartSelect(index);
+                                  setShowTargetIcons(showTarget);
+                              }}
+                              dropPreviewIndex={dropPreviewIndex}
+                              onDropPreviewSelect={onDropPreviewSelect}
+                              map={map}
+                              state={viewMode}
+                          />
+                      ))}
             </div>
             <div className={styles.lastSearchLine}>
-                <PlainButton
-                    style={
-                        showTargetIcons && moveStartIndex >= 0 && moveStartIndex + 1 < points.length
-                            ? { paddingTop: '2rem' }
-                            : {}
-                    }
-                    onClick={() => Dispatcher.dispatch(new AddPoint(points.length, { lat: 0, lng: 0 }, false, true))}
-                    className={styles.addSearchBox}
-                >
-                    <AddIcon />
-                    <div>{tr('add_to_route')}</div>
-                </PlainButton>
-                <PlainButton className={styles.settingsButton} onClick={() => setShowSettings(!showSettings)}>
+            {viewMode !== 0 && ( // Render the button only when viewMode is not 0
+                    <PlainButton
+                        style={
+                            showTargetIcons &&
+                            moveStartIndex >= 0 &&
+                            moveStartIndex + 1 < points.length
+                                ? { paddingTop: '2rem' }
+                                : {}
+                        }
+                        onClick={() => Dispatcher.dispatch(new AddPoint(points.length, { lat: 0, lng: 0 }, false, true))}
+                        className={styles.addSearchBox}
+                        disabled={viewMode === 0} // Disable Add button in viewMode 0
+                    >
+                        <AddIcon />
+                        <div>{tr('add_to_route')}</div>
+                    </PlainButton>
+                )}
+
+                {/* <PlainButton className={styles.settingsButton} onClick={() => setShowSettings(!showSettings)}>
                     {showSettings ? tr('settings_close') : tr('settings')}
-                </PlainButton>
+                </PlainButton> */}
             </div>
             {showSettings && <SettingsBox />}
         </div>
-    )
+    );
 }
+
+
 
 const SearchBox = ({
     index,
@@ -78,6 +117,7 @@ const SearchBox = ({
     dropPreviewIndex,
     onDropPreviewSelect,
     map,
+    state
 }: {
     index: number
     points: QueryPoint[]
@@ -89,6 +129,7 @@ const SearchBox = ({
     dropPreviewIndex: number
     onDropPreviewSelect: (index: number) => void
     map: Map
+    state: number
 }) => {
     const point = points[index]
 
@@ -136,11 +177,20 @@ const SearchBox = ({
                         } else onMoveStartSelect(index, true)
                     }}
                 >
-                    <MarkerComponent
+                    {state === 0 ? (
+                       <FontAwesomeIcon
+                       icon={faSearch} // Use faTimes for "close" icon
+                       className="text-blue-500 text-2xl mr-2"
+                    style={{ color: '#2c8ff4' }}
+                   />
+                    ) : (
+                        <MarkerComponent
                         number={index > 0 && index + 1 < points.length ? '' + index : undefined}
                         cursor="ns-resize"
                         color={moveStartIndex >= 0 ? 'gray' : point.color}
                     />
+                    )}
+                    
                 </div>
             )}
             {moveStartIndex >= 0 && moveStartIndex != index && (
@@ -195,6 +245,7 @@ const SearchBox = ({
                         onDropPreviewSelect(-1)
                     }}
                     onChange={onChange}
+                    state={state}
                 />
             </div>
             {deletable && (

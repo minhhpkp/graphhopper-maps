@@ -23,11 +23,11 @@
 
 .highlightedItem,
 .selectableItem:hover {
-    background-color: #ececec;
+    background-color: #2c8ff4;
 }
 
 .selectableItem:active {
-    background-color: #c6c6c6;
+    background-color: #2c8ff4;
 }
 
 .currentLocationEntry {

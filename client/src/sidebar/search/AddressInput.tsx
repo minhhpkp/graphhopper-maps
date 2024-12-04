@@ -35,23 +35,36 @@ export interface AddressInputProps {
     dropPreviewIndex: number
     index: number
     map: Map
+    // Optional state prop for additional configuration
+    state?: number
 }
 
 export default function AddressInput(props: AddressInputProps) {
     const [origText, setOrigText] = useState(props.point.queryText)
-    // controlled component pattern with initial value set from props
     const [text, setText] = useState(props.point.queryText)
     useEffect(() => setText(props.point.queryText), [props.point.queryText])
 
-    // keep track of focus and toggle fullscreen display on small screens
     const [hasFocus, setHasFocus] = useState(false)
     const isSmallScreen = useMediaQuery({ query: '(max-width: 44rem)' })
 
-    // container for geocoding results which gets set by the geocoder class and set to empty if the underlying query
-    // point gets changed from outside also gets filled with an item to select the current location as input if input
-    // has focus and geocoding results are empty
     const [origAutocompleteItems, setOrigAutocompleteItems] = useState<AutocompleteItem[]>([])
     const [autocompleteItems, setAutocompleteItems] = useState<AutocompleteItem[]>([])
+
+    // get the bias point for the geocoder
+    const lonlat = toLonLat(getMap().getView().getCenter()!)
+    const biasCoord = { lng: lonlat[0], lat: lonlat[1] }
+
+    // Placeholder text logic, incorporating both original implementations
+    const placeholderText = props.state === 0
+        ? 'Tìm kiếm vị trí trên bản đồ' // Vietnamese for "Search for a location on the map"
+        : tr(
+            props.point.type === QueryPointType.From
+                ? 'from_hint'
+                : props.point.type === QueryPointType.To
+                ? 'to_hint'
+                : 'via_hint'
+          )
+
     const [geocoder] = useState(
         new Geocoder(getApi(), (query, provider, hits) => {
             const items: AutocompleteItem[] = []
@@ -79,9 +92,10 @@ export default function AddressInput(props: AddressInputProps) {
 
     // if item is selected we need to clear the autocompletion list
     useEffect(() => setAutocompleteItems([]), [props.point])
+    
     // if no items but input is selected show current location item
     useEffect(() => {
-        if (hasFocus && text.length == 0 && autocompleteItems.length === 0)
+        if (hasFocus && text.length === 0 && autocompleteItems.length === 0)
             setAutocompleteItems([new SelectCurrentLocationItem()])
     }, [autocompleteItems, hasFocus])
 
@@ -91,22 +105,17 @@ export default function AddressInput(props: AddressInputProps) {
         setAutocompleteItems([])
     }
 
-    // highlighted result of geocoding results. Keep track which index is highlighted and change things on ArrowUp and Down
-    // on Enter select highlighted result or the 0th if nothing is highlighted
+    // highlighted result of geocoding results
     const [highlightedResult, setHighlightedResult] = useState<number>(-1)
     useEffect(() => setHighlightedResult(-1), [autocompleteItems])
 
-    // for positioning of the autocomplete we need:
-    const searchInputContainer = useRef<HTMLInputElement>(null)
-
-    // to focus the input after clear button we need:
+    // refs for input and container
+    const searchInputContainer = useRef<HTMLDivElement>(null)
     const searchInput = useRef<HTMLInputElement>(null)
 
     const onKeypress = useCallback(
         (event: React.KeyboardEvent<HTMLInputElement>) => {
-            const inputElement = event.target as HTMLInputElement
             if (event.key === 'Escape') {
-                // onBlur is deactivated for mobile so force:
                 setHasFocus(false)
                 setText(origText)
                 hideSuggestions()
@@ -132,11 +141,10 @@ export default function AddressInput(props: AddressInputProps) {
                         return nextIndex
                     })
 
-                    event.preventDefault() // stop propagating event to input to avoid that cursor is moved to start when ArrowUp
+                    event.preventDefault()
                     break
                 case 'Enter':
                 case 'Tab':
-                    // try to parse input as coordinate. Otherwise query nominatim
                     const coordinate = textToCoordinate(text)
                     if (coordinate) {
                         props.onAddressSelected(text, coordinate)
@@ -147,7 +155,6 @@ export default function AddressInput(props: AddressInputProps) {
                             handlePoiSearch(poiSearch, item.result, props.map)
                             props.onAddressSelected(item.result.text(item.result.poi), undefined)
                         } else if (highlightedResult < 0) {
-                            // by default use the first result, otherwise the highlighted one
                             getApi()
                                 .geocode(text, 'nominatim')
                                 .then(result => {
@@ -163,7 +170,6 @@ export default function AddressInput(props: AddressInputProps) {
                             props.onAddressSelected(item.toText(), item.point)
                         }
                     }
-                    // onBlur is deactivated for mobile so force:
                     setHasFocus(false)
                     hideSuggestions()
                     break
@@ -172,48 +178,44 @@ export default function AddressInput(props: AddressInputProps) {
         [autocompleteItems, highlightedResult]
     )
 
-    // the "fullscreen" css is only defined for smallscreen
-    const containerClass = hasFocus ? styles.fullscreen : ''
-    const type = props.point.type
-
-    // get the bias point for the geocoder
-    const lonlat = toLonLat(getMap().getView().getCenter()!)
-    const biasCoord = { lng: lonlat[0], lat: lonlat[1] }
-
     return (
-        <div className={containerClass}>
+        <div className={hasFocus ? styles.fullscreen : ''}>
             <div
                 ref={searchInputContainer}
                 className={[
                     styles.inputContainer,
-                    // show line (border) where input would be moved if dropped
-                    props.dropPreviewIndex == props.index
+                    props.dropPreviewIndex === props.index
                         ? props.dropPreviewIndex < props.moveStartIndex
                             ? styles.topBorder
                             : styles.bottomBorder
-                        : {},
+                        : '',
                 ].join(' ')}
             >
-                <PlainButton
-                    className={styles.btnClose}
-                    onClick={() => {
-                        setHasFocus(false)
-                        hideSuggestions()
-                    }}
-                >
-                    <ArrowBack />
-                </PlainButton>
+                {hasFocus && (
+                    <PlainButton
+                        className={styles.btnClose}
+                        onClick={() => {
+                            setHasFocus(false)
+                            hideSuggestions()
+                        }}
+                    >
+                        <ArrowBack />
+                    </PlainButton>
+                )}
+                
                 <input
-                    style={props.moveStartIndex == props.index ? { borderWidth: '2px', margin: '-1px' } : {}}
+                    style={props.moveStartIndex === props.index ? { borderWidth: '2px', margin: '-1px' } : {}}
                     className={styles.input}
                     type="text"
                     ref={searchInput}
                     autoComplete="off"
-                    onChange={e => {
+                    value={text}
+                    placeholder={placeholderText}
+                    onChange={(e) => {
                         const query = e.target.value
                         setText(query)
                         const coordinate = textToCoordinate(query)
-                        if (!coordinate) geocoder.request(e.target.value, biasCoord, getMap().getView().getZoom())
+                        if (!coordinate) geocoder.request(query, biasCoord, getMap().getView().getZoom())
                         props.onChange(query)
                     }}
                     onKeyDown={onKeypress}
@@ -223,25 +225,22 @@ export default function AddressInput(props: AddressInputProps) {
                         if (origAutocompleteItems.length > 0) setAutocompleteItems(origAutocompleteItems)
                     }}
                     onBlur={() => {
-                        if (!isSmallScreen) hideSuggestions() // see #398
+                        if (!isSmallScreen) hideSuggestions()
                     }}
-                    value={text}
-                    placeholder={tr(
-                        type == QueryPointType.From ? 'from_hint' : type == QueryPointType.To ? 'to_hint' : 'via_hint'
-                    )}
                 />
 
-                <PlainButton
-                    style={text.length == 0 ? { display: 'none' } : {}}
-                    className={styles.btnInputClear}
-                    onClick={() => {
-                        setText('')
-                        props.onChange('')
-                        searchInput.current!.focus()
-                    }}
-                >
-                    <Cross />
-                </PlainButton>
+                {text.length > 0 && (
+                    <PlainButton
+                        className={styles.btnInputClear}
+                        onClick={() => {
+                            setText('')
+                            props.onChange('')
+                            searchInput.current!.focus()
+                        }}
+                    >
+                        <Cross />
+                    </PlainButton>
+                )}
 
                 {autocompleteItems.length > 0 && (
                     <ResponsiveAutocomplete
@@ -275,6 +274,7 @@ export default function AddressInput(props: AddressInputProps) {
     )
 }
 
+// Utility functions
 function handlePoiSearch(poiSearch: ReverseGeocoder, result: AddressParseResult, map: Map) {
     if (!result.hasPOIs()) return
 
@@ -314,10 +314,7 @@ function calculateHighlightedIndex(length: number, currentIndex: number, increme
     return nextIndex
 }
 
-/**
- * This could definitely be achieved with an effect. But after trying for a while I saved some money and wrote it the
- * Way I know. If we hire an 10+ react developer, this should be changed.
- */
+// Geocoder, ReverseGeocoder, and Timeout classes remain the same as in the original implementation
 class Geocoder {
     private requestId = 0
     private readonly timeout = new Timout(200)
@@ -334,7 +331,6 @@ class Geocoder {
     }
 
     cancel() {
-        // invalidates last request if there is one
         this.getNextId()
     }
 

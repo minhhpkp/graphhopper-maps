@@ -30,17 +30,23 @@ export default function ContextMenu({ map, route, queryPoints }: ContextMenuProp
     const abortControllerRef = useRef<AbortController | null>(null); // Tham chiếu đến AbortController
 
     useEffect(() => {
+     
         // Tạo popup rỗng
         if (!popupRef.current) {
             popupRef.current = document.createElement('div');
             popupRef.current.style.padding = '20px';
             popupRef.current.style.backgroundColor = 'white';
-            popupRef.current.style.border = '1px solid black';
-            popupRef.current.style.borderRadius = '5px';
+            popupRef.current.style.border = `1px solid #2c8ff4`; // Updated to primary color
+            popupRef.current.style.borderRadius = '10px'; // Slightly larger border radius for smoother corners
             popupRef.current.style.minWidth = '300px';
             popupRef.current.style.textAlign = 'left';
+            popupRef.current.style.boxShadow = '0 4px 8px rgba(44, 143, 244, 0.2)'; // Subtle shadow with primary color
+            popupRef.current.style.color = '#2c8ff4'; // Text color updated for consistency
+            popupRef.current.style.fontFamily = `'Arial', sans-serif`; // Ensures consistent font styling
+            popupRef.current.style.transition = 'transform 0.3s ease, box-shadow 0.3s ease'; // Add smooth animations
         }
     }, []);
+    
 
     const fetchPoiData = async (lng: number, lat: number) => {
         if (abortControllerRef.current) {
@@ -63,57 +69,58 @@ export default function ContextMenu({ map, route, queryPoints }: ContextMenuProp
             // Cập nhật nội dung popup nhỏ với thông tin gọn gàng
             if (popupRef.current) {
                 popupRef.current.innerHTML = `
-                    <style>
-                        .popup-small {
-                            display: flex;
-                            flex-direction: column;
-                            padding: 10px;
-                            border-radius: 10px;
-                            background-color: #ffffff;
-                            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-                            font-family: 'Arial, sans-serif';
-                            max-width: 250px;
-                            border: 1px solid #ddd;
-                            transition: all 0.3s ease-in-out;
-                        }
-                        .popup-title {
-                            font-size: 16px;
-                            color: #333;
-                            font-weight: bold;
-                            margin-bottom: 5px;
-                        }
-                        .popup-address {
-                            font-size: 14px;
-                            color: #666;
-                            margin-bottom: 10px;
-                        }
-                        .details-button {
-                            display: inline-block;
-                            background-color: #444;
-                            color: #fff;
-                            border: none;
-                            padding: 5px 10px;
-                            border-radius: 5px;
-                            cursor: pointer;
-                            font-size: 14px;
-                            text-align: center;
-                            transition: background-color 0.2s ease-in-out;
-                        }
-                        .details-button:hover {
-                            background-color: #555; /* Màu nền sáng hơn khi hover */
-                            transform: scale(1.05); /* Hiệu ứng phóng nhẹ */
-                        }
-                        .details-button:active {
-                            background-color: #666; /* Màu tối hơn khi nhấn */
-                            transform: scale(0.98); /* Hiệu ứng thu nhỏ nhẹ khi nhấn */
-                        }
-                    </style>
-                    <div class="popup-small">
-                        <span class="popup-title">${data.en_title || 'N/A'}</span>
-                        <span class="popup-address">${data.address?.join(', ') || 'N/A'}</span>
-                        <button id="details-button" class="details-button">Chi tiết</button>
-                    </div>
-                `;
+                <style>
+                    .popup-small {
+                        display: flex;
+                        flex-direction: column;
+                        padding: 10px;
+                        border-radius: 10px;
+                        background-color: #ffffff;
+                        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                        font-family: 'Arial, sans-serif';
+                        max-width: 250px;
+                        border: 1px solid #2c8ff4; /* Updated border to primary color */
+                        transition: all 0.3s ease-in-out;
+                    }
+                    .popup-title {
+                        font-size: 16px;
+                        color: #2c8ff4; /* Updated title color to primary */
+                        font-weight: bold;
+                        margin-bottom: 5px;
+                    }
+                    .popup-address {
+                        font-size: 14px;
+                        color: #666; /* Neutral color for the address */
+                        margin-bottom: 10px;
+                    }
+                    .details-button {
+                        display: inline-block;
+                        background-color: #2c8ff4; /* Primary color for button */
+                        color: #fff; /* White text for contrast */
+                        border: none;
+                        padding: 5px 10px;
+                        border-radius: 5px;
+                        cursor: pointer;
+                        font-size: 14px;
+                        text-align: center;
+                        transition: all 0.2s ease-in-out;
+                    }
+                    .details-button:hover {
+                        background-color: #1b6dc2; /* Slightly darker shade on hover */
+                        transform: scale(1.05); /* Slight zoom effect */
+                    }
+                    .details-button:active {
+                        background-color: #144c91; /* Even darker shade when active */
+                        transform: scale(0.98); /* Slight shrink effect */
+                    }
+                </style>
+                <div class="popup-small">
+                    <span class="popup-title">${data.en_title || 'N/A'}</span>
+                    <span class="popup-address">${data.address?.join(', ') || 'N/A'}</span>
+                    <button id="details-button" class="details-button">Chi tiết</button>
+                </div>
+            `;
+
     
                 // Thêm sự kiện click cho nút "Chi tiết"
                 setTimeout(() => {
@@ -158,12 +165,10 @@ export default function ContextMenu({ map, route, queryPoints }: ContextMenuProp
         detailsPopup.style.position = 'fixed';
         detailsPopup.style.bottom = '0';
         detailsPopup.style.left = '0';
-        detailsPopup.style.width = '25%';
-        detailsPopup.style.maxHeight = '70%'; // Chiều cao tối đa 70% màn hình
+        detailsPopup.style.width = '29%';
+        detailsPopup.style.height = '100%'; // Chiều cao tối đa 70% màn hình
         detailsPopup.style.backgroundColor = '#ffffff';
-        detailsPopup.style.zIndex = '1000';
         detailsPopup.style.overflowY = 'auto'; // Cho phép cuộn nội dung
-        detailsPopup.style.padding = '20px';
         detailsPopup.style.boxShadow = '0 -4px 20px rgba(0, 0, 0, 0.2)';
         detailsPopup.style.borderTopLeftRadius = '15px';
         detailsPopup.style.borderTopRightRadius = '15px';
@@ -171,111 +176,126 @@ export default function ContextMenu({ map, route, queryPoints }: ContextMenuProp
     
         // HTML của popup chi tiết
         detailsPopup.innerHTML = `
-            <style>
-                .details-popup-header {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    padding-bottom: 10px;
-                    border-bottom: 1px solid #ddd;
-                }
-                .details-popup-header h2 {
-                    font-size: 18px;
-                    color: #333;
-                    margin: 0;
-                }
-                .details-close-btn {
-                    background: none;
-                    border: none;
-                    font-size: 18px;
-                    color: #666;
-                    cursor: pointer;
-                    transition: color 0.3s;
-                }
-                .details-close-btn:hover {
-                    color: #ff4d4d;
-                }
-                .details-popup-content {
-                    margin-top: 15px;
-                }
-                .details-row {
-                    margin-bottom: 10px;
-                }
-                .details-label {
-                    font-weight: bold;
-                    color: #555;
-                }
-                .details-value {
-                    color: #333;
-                }
-                .details-icon {
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    margin: 10px 0;
-                }
-                .details-icon img {
-                    width: 70px;
-                    height: 70px;
-                    border-radius: 10px;
-                    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-                }
-                .details-footer {
-                    display: flex;
-                    justify-content: center;
-                    margin-top: 20px;
-                }
-                .action-button {
-                    padding: 10px 20px;
-                    font-size: 14px;
-                    color: #fff;
-                    background-color: #007bff;
-                    border: none;
-                    border-radius: 5px;
-                    cursor: pointer;
-                    transition: background-color 0.3s ease-in-out;
-                }
-                .action-button:hover {
-                    background-color: #0056b3;
-                }
-            </style>
-            <div>
-                <div class="details-popup-header">
-                    <h2>${data.en_title || 'N/A'}</h2>
-                    <button id="close-details" class="details-close-btn">&times;</button>
-                </div>
-                <div class="details-popup-content">
-                    <div class="details-row">
-                        <span class="details-label">Business Type:</span>
-                        <span class="details-value">${data.en_business?.join(', ') || 'N/A'}</span>
-                    </div>
-                    <div class="details-row">
-                        <span class="details-label">Address:</span>
-                        <span class="details-value">${data.address?.join(', ') || 'N/A'}</span>
-                    </div>
-                    <div class="details-row">
-                        <span class="details-label">Telephone:</span>
-                        <span class="details-value">${data.tele || 'N/A'}</span>
-                    </div>
-                    <div class="details-row">
-                        <span class="details-label">Open Time:</span>
-                        <span class="details-value">${openTime}</span>
-                    </div>
-                    <div class="details-row">
-                        <span class="details-label">Website:</span>
-                        <a href="${data.webSite || '#'}" class="details-value" target="_blank" style="color: #007bff;">${data.webSite || 'N/A'}</a>
-                    </div>
-                    <div class="details-row">
-                        <span class="details-label">About:</span>
-                        <span class="details-value">${data.about ? formatAboutSection(data.about) : 'N/A'}</span>
-                    </div>
-                    <div class="details-icon">
-                        <img src="${data.icon}" alt="Icon" />
-                    </div>
-                </div>
-                
+        <style>
+            .details-popup-container {
+                background-color: #ffffff;
+                border-radius: 10px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+                font-family: 'Arial, sans-serif';
+                height: 100% !important
+                max-height: 90vh; /* Ensure it doesn’t exceed 90% of screen height */
+                overflow-y: auto; /* Enable scrolling if content overflows */
+            }
+            .details-popup-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding-bottom: 10px;
+                border-bottom: 1px solid #2c8ff4;
+            }
+            .details-popup-background {
+                height: 300px; /* Adjust as needed */
+                background-image: url('https://media.istockphoto.com/id/1209176894/vector/city-silhouette-background-in-the-morning-atmosphere-city-vector.jpg?s=612x612&w=0&k=20&c=8O6fGR-nKc6ecL863kMNxUi0J9baWyMf3Tc2aY-6eeI='); /* Replace with your image URL */
+                background-size: cover;
+                background-position: center;
+            }
+            .details-popup-header h2 {
+                font-size: 18px;
+                color: #2c8ff4;
+                margin: 0;
+                padding: 10px;
+                background: rgba(255, 255, 255, 0.8); /* Optional overlay for better text readability */
+                border-radius: 5px;
+            }
+            .details-close-btn {
+                background: none;
+                border: none;
+                font-size: 18px;
+                color: #2c8ff4;
+                cursor: pointer;
+                transition: color 0.3s;
+            }
+            .details-close-btn:hover {
+                color: #1b6dc2;
+            }
+            .details-popup-content {
+                margin-top: 15px;
+                padding: 10px;
+            }
+            .details-row {
+                margin-bottom: 10px;
+            }
+            .details-label {
+                font-weight: bold;
+                color: #2c8ff4;
+            }
+            .details-value {
+                color: #333;
+            }
+            .details-icon {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                margin: 10px 0;
+            }
+            .details-icon img {
+                width: 70px;
+                height: 70px;
+                border-radius: 10px;
+                box-shadow: 0 2px 5px rgba(44, 143, 244, 0.3);
+            }
+            .action-button {
+                padding: 10px 20px;
+                font-size: 14px;
+                color: #fff;
+                background-color: #2c8ff4;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: background-color 0.3s ease-in-out;
+            }
+            .action-button:hover {
+                background-color: #1b6dc2;
+            }
+        </style>
+        <div class="details-popup-container">
+            <div class="details-popup-background"></div>
+            <div class="details-popup-header">
+                <h2>${data.en_title || 'N/A'}</h2>
+                <button id="close-details" class="details-close-btn">&times;</button>
             </div>
-        `;
+            <div class="details-popup-content">
+                <div class="details-row">
+                    <span class="details-label">Business Type:</span>
+                    <span class="details-value">${data.en_business?.join(', ') || 'N/A'}</span>
+                </div>
+                <div class="details-row">
+                    <span class="details-label">Address:</span>
+                    <span class="details-value">${data.address?.join(', ') || 'N/A'}</span>
+                </div>
+                <div class="details-row">
+                    <span class="details-label">Telephone:</span>
+                    <span class="details-value">${data.tele || 'N/A'}</span>
+                </div>
+                <div class="details-row">
+                    <span class="details-label">Open Time:</span>
+                    <span class="details-value">${openTime}</span>
+                </div>
+                <div class="details-row">
+                    <span class="details-label">Website:</span>
+                    <a href="${data.webSite || '#'}" class="details-value" target="_blank" style="color: #2c8ff4;">${data.webSite || 'N/A'}</a>
+                </div>
+                <div class="details-row">
+                    <span class="details-label">About:</span>
+                    <span class="details-value">${data.about ? formatAboutSection(data.about) : 'N/A'}</span>
+                </div>
+               
+            </div>
+        </div>
+    `;
+        
+
     
         document.body.appendChild(detailsPopup);
         activeDetailsPopup = detailsPopup;
@@ -326,33 +346,53 @@ export default function ContextMenu({ map, route, queryPoints }: ContextMenuProp
     };
 
     const handleLeftClick = (e: any) => {
-        // Nếu click vào nút "Chi tiết", không thực hiện hành động thay đổi marker
-        if (e.target?.id === 'details-button') {
+        // Prevent handling clicks on the marker or its children
+        if (e.target.closest && e.target.closest('div[role="marker"]')) {
             return;
         }
-    
+        
         setRightClick(false);
         setCoordinate(e);
-    
-        // Xóa marker và popup hiện tại nếu có
+        if (currentPopupRef.current) {
+            map.removeOverlay(currentPopupRef.current);
+        }
+        // Remove the current marker if it exists
         if (currentMarkerRef.current) {
             map.removeOverlay(currentMarkerRef.current);
             currentMarkerRef.current = null;
         }
-        if (currentPopupRef.current) {
-            map.removeOverlay(currentPopupRef.current);
-            currentPopupRef.current = null;
-        }
     
-        // Đặt marker mới tại tọa độ click chuột trái
+        // Add a new marker at the clicked location
         const coordinate = map.getEventCoordinate(e);
         const lonLat = toLonLat(coordinate);
     
-        // Tạo và thêm marker vào bản đồ
-        const markerSvg = createSvg({ color: '#808080', size: 30 }); // Màu xám và kích thước tùy chỉnh
+        // Create and add the new marker to the map
+        const markerSvg = createSvg({ color: '#808080', size: 30 }); // Custom color and size
         const markerElement = document.createElement('div');
         markerElement.innerHTML = markerSvg;
         markerElement.style.cursor = 'pointer';
+        markerElement.setAttribute('role', 'marker'); // Add a role attribute to identify markers
+    
+        // Add a click event to the marker to display a popup
+        markerElement.addEventListener('click', () => {
+            if (popupRef.current) {
+                popupRef.current.innerHTML = '<p>Đang tải dữ liệu...</p>';
+            }
+            
+            // Remove the current popup if it exists
+            if (currentPopupRef.current) {
+                map.removeOverlay(currentPopupRef.current);
+            }
+    
+            const popupOverlay = new Overlay({
+                element: popupRef.current!,
+                position: coordinate,
+                positioning: 'bottom-center',
+                offset: [0, -35], // Adjust position so it doesn't block the marker
+            });
+            map.addOverlay(popupOverlay);
+            currentPopupRef.current = popupOverlay;
+        });
     
         const markerOverlay = new Overlay({
             element: markerElement,
@@ -362,26 +402,11 @@ export default function ContextMenu({ map, route, queryPoints }: ContextMenuProp
         });
         map.addOverlay(markerOverlay);
         currentMarkerRef.current = markerOverlay;
-    
-        // Tạo popup tạm thời "Đang tải dữ liệu"
-        if (popupRef.current) {
-            popupRef.current.innerHTML = '<p>Đang tải dữ liệu...</p>';
-        }
-    
-        // Tạo hoặc cập nhật popup hiện tại
-        if (currentPopupRef.current) {
-            map.removeOverlay(currentPopupRef.current);
-        }
-    
-        const popupOverlay = new Overlay({
-            element: popupRef.current!,
-            position: coordinate,
-            positioning: 'bottom-center',
-            offset: [0, -35], // Điều chỉnh vị trí popup để không che marker
-        });
-        map.addOverlay(popupOverlay);
-        currentPopupRef.current = popupOverlay;
     };
+    
+    
+    
+    
     
 
     useEffect(() => {

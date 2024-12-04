@@ -1,10 +1,26 @@
-# How to run:
-npm run start: Run both client and server
-npm install all: Install needed dependencies
-
-Other scripts: Read in package.json
-
 # GraphHopper Maps
+
+## Quickstart
+
+From the project root directory, run this to install dependencies:
+
+    npm install ; npm run install-all
+
+run this to add default local development config for the front-end project:
+
+    npm run add-default-config
+
+install MongoDB and run this to import data:
+
+    npm run import
+
+run this to start both client and server:
+
+    npm run start
+
+Other scripts: Read package.json files from /client or /server directories.
+
+## Introduction
 
 A route planner user interface for the [GraphHopper routing engine](https://github.com/graphhopper/graphhopper) released under the Apache License 2.0.
 
@@ -21,47 +37,46 @@ With autocomplete, alternative routes, information along the route and POI searc
 There is [an experimental `navi` branch](https://github.com/graphhopper/graphhopper-maps/tree/navi) that implements turn-by-turn navigation
 [directly in the browser](https://navi.graphhopper.org).
 
-## Start development:
+## Start development
 
- * Clone this repository.
- * Make sure node and npm are installed. We recommend using the iron LTS (node v20.14.0 and npm 10.7.0).
- * npm install
- * npm run serve
- * Open your browser at http://0.0.0.0:3000/.
- * Start development. The browser will update automatically when you change the code.
- * Format the code and run the tests using `npm run format` and `npm run test`.
- * Fork the repository and create a pull request. Contributions are welcome. Feel free to discuss your changes in our
-   [forum](https://discuss.graphhopper.com/) or the GitHub [issues](https://github.com/graphhopper/graphhopper-maps/issues).
- * You can build the production bundle using `npm run build`.
- * If you use the Directions API edit the config to show profile icons properly (see 'Advanced configuration' section below).
+- Clone this repository.
+- Make sure node and npm are installed. We recommend using the iron LTS (node v20.14.0 and npm 10.7.0).
+- npm install
+- npm run serve
+- Open your browser at <http://0.0.0.0:3000/>.
+- Start development. The browser will update automatically when you change the code.
+- Format the code and run the tests using `npm run format` and `npm run test`.
+- Fork the repository and create a pull request. Contributions are welcome. Feel free to discuss your changes in our
+  [forum](https://discuss.graphhopper.com/) or the GitHub [issues](https://github.com/graphhopper/graphhopper-maps/issues).
+- You can build the production bundle using `npm run build`.
+- If you use the Directions API edit the config to show profile icons properly (see 'Advanced configuration' section below).
 
-## Help with translations:
+## Help with translations
 
 GraphHopper Maps is translated into many languages and you can help improve GraphHopper by adding or improving your language! See [this spreadsheet](https://docs.google.com/spreadsheets/d/18z00Rbt6QvLIkayEV9P89vW9oU0QbTVsjRk9nz1CeFY/edit#gid=0)
 to create a new or improve an existing language. Let us know if you changed something or submit a pull request with your changes after the following steps:
 
- * Edit the spreadsheet
- * Run `python update-translations.py`
- * Review your changes via e.g. http://localhost:3000/?locale=en and with `git diff`. Make sure that is the only one with `git status`.
- 
+- Edit the spreadsheet
+- Run `python update-translations.py`
+- Review your changes via e.g. <http://localhost:3000/?locale=en> and with `git diff`. Make sure that is the only one with `git status`.
+
 Please note that the translations for the server-side turn instructions are located in [a different repository](https://github.com/graphhopper/graphhopper/blob/master/docs/core/translations.md).
 
 ## Advanced configuration
 
-You can point the app to a different url, like a [local GraphHopper server](https://github.com/graphhopper/graphhopper), 
+You can point the app to a different url, like a [local GraphHopper server](https://github.com/graphhopper/graphhopper),
 set your own API keys for the different map tile providers and more in the [config.js](./config.js) file. For such changes it is
 best to create a copy of this file called `config-local.js` which will be ignored by git.
 
 ## Further Notes
 
-Every branch of this repository can be tested at https://graphhopper.com/maps-dev/<branch_name>/
+Every branch of this repository can be tested at <https://graphhopper.com/maps-dev/><branch_name>/
 
 ## Powered By
 
 This project uses
 
- * the great [OpenLayers library](https://openlayers.org/).
- * the [codemirror](https://codemirror.net/) code editor for the custom model editor.
- * many icons from Google's [open source font library](https://fonts.google.com/icons).
- * many more open source projects - see the package.json
-
+- the great [OpenLayers library](https://openlayers.org/).
+- the [codemirror](https://codemirror.net/) code editor for the custom model editor.
+- many icons from Google's [open source font library](https://fonts.google.com/icons).
+- many more open source projects - see the package.json

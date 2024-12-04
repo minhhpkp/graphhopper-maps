@@ -14,7 +14,7 @@ if (fs.existsSync(localConfig)) {
 } else if (fs.existsSync(defaultConfig)) {
     config = defaultConfig
 } else {
-    throw `The config file is missing: ${defaultConfig}`
+    throw new Error(`The config file is missing: ${defaultConfig}`)
 }
 
 // get git info from command line

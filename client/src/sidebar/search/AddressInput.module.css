@@ -1,12 +1,13 @@
 .btnInputClear {
     display: none;
     padding: 0 5px;
-    color: grey;
+    color: #2c8ff4; /* Updated to primary color */
     scale: 0.7;
 }
 
 .btnClose {
     display: none;
+    color: #2c8ff4; /* Updated to primary color */
 }
 
 .inputContainer {
@@ -15,20 +16,23 @@
     grid-gap: 0;
 
     box-sizing: border-box;
-    border: 1px solid #5b616a;
+    border: 1px solid #2c8ff4; /* Updated to primary color */
     border-radius: 0.2rem;
-    /* for the radius we need some padding otherwise the corners will be nearly hidden */
-    padding: 1px;
+    padding: 1px; /* Padding ensures corners are visible */
+    margin-right: 70px;
+    width: 100%;
 }
 
 .input {
     border: none;
     padding: 0.25rem 0.5rem;
     font-size: 1.05rem;
+    color: black; /* Text color updated */
 }
 
 .input:focus {
     outline: none;
+    border-color: #2c8ff4; /* Focused border updated to primary color */
 }
 
 .smallList {
@@ -56,12 +60,15 @@
         display: block;
         margin: 0;
         padding: 5px 15px 5px 5px;
+        color: #2c8ff4; /* Updated to primary color */
     }
 
     .fullscreen .btnInputClear {
         display: block;
+        color: #2c8ff4; /* Updated to primary color */
     }
-    /* when showing btnInputClear => remove the padding */
+
+    /* When showing btnInputClear => remove the padding */
     .fullscreen .input {
         padding-right: 0;
     }
@@ -70,8 +77,10 @@
 @media not all and (max-width: 44rem) {
     .inputContainer:hover .btnInputClear {
         display: block;
+        color: #2c8ff4; /* Updated to primary color */
     }
-    /* when showing btnInputClear => remove the padding */
+
+    /* When showing btnInputClear => remove the padding */
     .inputContainer:hover .input {
         padding-right: 0;
     }
@@ -80,11 +89,11 @@
 .topBorder {
     padding-top: 3px;
     margin-top: -5px;
-    border-top: dashed grey 2px;
+    border-top: dashed #2c8ff4 2px; /* Updated border color */
 }
 
 .bottomBorder {
     padding-bottom: 3px;
     margin-bottom: -5px;
-    border-bottom: dashed grey 2px;
+    border-bottom: dashed #2c8ff4 2px; /* Updated border color */
 }

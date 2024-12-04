@@ -33,7 +33,6 @@
     pointer-events: none;
     z-index: 2;
     align-self: stretch;
-
     margin: 0 0.5rem 0 0.5rem;
     overflow: hidden;
     position: relative;
@@ -47,7 +46,6 @@
     background-color: white;
     max-height: calc(100% - 2rem);
     margin: 0.5rem;
-
     box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.1);
     pointer-events: all;
     overflow: auto;
@@ -58,15 +56,11 @@
     grid-column: 3 / span 1;
     grid-row: 1 / span 1;
     z-index: 1;
-
     padding: 0.5rem;
 }
 
 .onMapRightSide > div {
     cursor: pointer !important;
-}
-
-.onMapRightSide > div {
     background-color: white;
     border-radius: 0.5rem;
     box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.1);
@@ -101,12 +95,6 @@
     justify-self: end;
 }
 
-.onMapRightSide > div {
-    background-color: white;
-    border-radius: 0.5rem;
-    box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.1);
-}
-
 .smallScreenRoutingResult {
     grid-row: 4 / span 1;
     grid-column: 1 / span 1;
@@ -129,44 +117,57 @@
         grid-template-rows: auto 0 1fr auto auto;
     }
 }
-
-/* mapilion */
-@font-face {
-    font-family: 'Open Sans';
-    src: url(./fonts/OpenSans-Variable.ttf) format('truetype');
+.rowContainer {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Space between elements */
+    padding: 10px; /* Optional padding */
 }
 
-/* maptiler */
-@font-face {
-    font-family: 'Noto Sans';
-    src: url(./fonts/NotoSans-Regular.ttf) format('truetype');
+
+/* Buttons and interactions */
+.iconRow {
+    display: none;
+    justify-content: center;
+    position: fixed;
+    gap: 8px;
+    z-index: 1;
+    bottom: 55px;
+    width: calc(100% - 41px);
 }
 
-@font-face {
-    font-family: 'Roboto';
-    src: url(./fonts/Roboto-Regular.ttf) format('truetype');
+.iconButton {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    border: 1px solid black;
+    border-radius: 8px;
+    background-color: white;
+    cursor: pointer;
+    font-size: 14px;
+    color: black;
+    transition: background-color 0.2s, color 0.2s;
 }
-
-@font-face {
-    font-family: 'Roboto Condensed';
-    src: url(./fonts/RobotoCondensed-Regular.ttf) format('truetype');
+.iconButton > span {
+    display: none;
+}
+.iconButton:hover {
+    background-color: rgb(125, 122, 122);
+    color: white;
 }
 
 .sidebarCloseButton {
-    position: absolute;
-
-    color: lightgray !important; /* unsure why !important is necessary here but not in ErrorMessage.module.css for same <Cross/> */
-
-    height: 10px;
-    width: 10px;
-
-    right: 7px;
-    top: 6px;
+    top: 16px;
+    left: 16px;
+    background-color: white;
+    color: #2c8ff4 !important;
+    border: 2px solid #2c8ff4;
+    padding: 8px;
+    border-radius: 50%;
+    transition: background-color 0.3s, color 0.3s;
+    margin-right: 10px !important;
 }
 
-.sidebarCloseButton:hover {
-    color: black !important;
-}
 
 .sidebarWhenClosed {
     z-index: 1;
@@ -179,42 +180,22 @@
 }
 
 .sidebarOpenButton svg {
-    fill: gray;
-
+    fill: #2c8ff4;
     width: 30px;
     height: 24px;
 }
 
 .sidebarOpenButton:hover svg {
-    fill: black;
+    fill: #1b6dc2;
 }
 
-.iconRow {
-    display: none;
-    justify-content: center;
-    position: fixed;
-    gap: 8px;
-    z-index: 1; /* Ensures it appears above the map */
-    bottom: 55px;
-    width: calc(100% - 41px);
+.iconStyle {
+    color: #2c8ff4 !important; /* Add !important to override any conflicting styles */
+    transition: color 0.2s ease-in-out;
 }
 
-.iconButton {
-    display: flex;
-    align-items: center;
-    padding: 8px 12px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    background-color: white;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.2s;
-}
-.iconButton > span {
-    display: none;
-}
-.iconButton:hover {
-    background-color: #f1f1f1;
+.iconStyle:hover {
+    color: #1b6dc2; /* Slightly darker shade for hover effect */
 }
 
 @media only screen and (min-width: 380px) {
@@ -240,7 +221,6 @@
     .iconRow {
         top: 10px;
         left: 416px;
-
         bottom: auto;
         width: calc(100% - 470px);
     }

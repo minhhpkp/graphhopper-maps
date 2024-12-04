@@ -5,7 +5,7 @@ const config = {
     // the url of the GraphHopper routing backend, either use graphhopper.com or point it to your own GH instance
     routingApi: 'https://tmdt.fimo.edu.vn/',
     // the url of the geocoding backend, either use graphhopper.com or point it to another geocoding service. use an empty string to disable the address search
-    geocodingApi: 'https://tmdt.fimo.edu.vn/',
+    geocodingApi: 'http://tmdt.fimo.edu.vn/',
     // the tile layer used by default, see MapOptionsStore.ts for all options
     defaultTiles: 'OpenStreetMap',
     // various api keys used for the GH backend and the different tile providers
@@ -45,8 +45,6 @@ const config = {
     //
     // E.g. the 'bike' entry will add a "bike" profile for which we send a request with the specified 'details' parameter. You can even change the profile itself when you specify
     // bike: { profile: 'raw_bike', ... }
-
-    poiApi: 'https://tmdt.fimo.edu.vn/',
 }
 
 // this is needed for jest (with our current setup at least)

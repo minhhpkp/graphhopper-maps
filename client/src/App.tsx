@@ -47,7 +47,8 @@ import { SettingsContext } from '@/contexts/SettingsContext'
 import usePOIsLayer from '@/layers/UsePOIsLayer'
 import { FaUtensils, FaHospital, FaSchool, FaGasPump, FaMoneyBill, FaBus, FaLandmark } from 'react-icons/fa'
 import { BACKEND_SERVER_URL } from './settings'
-
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowLeft, faBars, faClose, faDiamondTurnRight, faMapSigns } from '@fortawesome/free-solid-svg-icons';
 export const POPUP_CONTAINER_ID = 'popup-container'
 export const SIDEBAR_CONTENT_ID = 'sidebar-content'
 
@@ -210,45 +211,68 @@ interface LayoutProps {
 }
 
 function LargeScreenLayout({ query, route, map, error, mapOptions, encodedValues, drawAreas }: LayoutProps) {
-    const [showSidebar, setShowSidebar] = useState(true)
-    const [showCustomModelBox, setShowCustomModelBox] = useState(false)
+    const [showSidebar, setShowSidebar] = useState(true);
+    const [showCustomModelBox, setShowCustomModelBox] = useState(false);
+    const [viewMode, setViewMode] = useState(0); // State for view mode
+
     return (
         <>
             {showSidebar ? (
                 <div className={styles.sidebar}>
                     <div className={styles.sidebarContent} id={SIDEBAR_CONTENT_ID}>
-                        <PlainButton onClick={() => setShowSidebar(false)} className={styles.sidebarCloseButton}>
-                            <Cross />
-                        </PlainButton>
-                        <RoutingProfiles
-                            routingProfiles={query.profiles}
-                            selectedProfile={query.routingProfile}
-                            showCustomModelBox={showCustomModelBox}
-                            toggleCustomModelBox={() => setShowCustomModelBox(!showCustomModelBox)}
-                            customModelBoxEnabled={query.customModelEnabled}
-                        />
-                        {showCustomModelBox && (
-                            <CustomModelBox
-                                customModelEnabled={query.customModelEnabled}
-                                encodedValues={encodedValues}
-                                customModelStr={query.customModelStr}
-                                queryOngoing={query.currentRequest.subRequests[0]?.state === RequestState.SENT}
-                                drawAreas={drawAreas}
+                    {viewMode === 1 && (
+                            <RoutingProfiles
+                                routingProfiles={query.profiles}
+                                selectedProfile={query.routingProfile}
+                                showCustomModelBox={showCustomModelBox}
+                                toggleCustomModelBox={() => setShowCustomModelBox(!showCustomModelBox)}
+                                customModelBoxEnabled={query.customModelEnabled}
                             />
                         )}
-                        <Search points={query.queryPoints} map={map} />
-                        <div>{!error.isDismissed && <ErrorMessage error={error} />}</div>
-                        <RoutingResults
-                            info={route.routingResult.info}
-                            paths={route.routingResult.paths}
-                            selectedPath={route.selectedPath}
-                            currentRequest={query.currentRequest}
-                            profile={query.routingProfile.name}
-                        />
-                        <div>
-                            <PoweredBy />
-                        </div>
+                    <div className={styles.rowContainer}>
+                        <PlainButton
+                            onClick={() => setShowSidebar(false)}
+                            className={styles.sidebarCloseButton}
+                        >
+                            <FontAwesomeIcon icon={faBars} />
+                        </PlainButton>
+                        <Search points={query.queryPoints} map={map} viewMode={viewMode} />
+
+                        <PlainButton
+                            className={styles.toggleViewButton}
+                            onClick={() => setViewMode(viewMode === 0 ? 1 : 0)}
+                        >
+                            <FontAwesomeIcon
+                                icon={viewMode === 0 ? faDiamondTurnRight : faClose}
+                                style={{ color: '#2c8ff4', fontSize: '24px', margin: '10px' }}
+                            />
+                        </PlainButton>
+
+                       
                     </div>
+                   
+                    {showCustomModelBox && (
+                        <CustomModelBox
+                            customModelEnabled={query.customModelEnabled}
+                            encodedValues={encodedValues}
+                            customModelStr={query.customModelStr}
+                            queryOngoing={query.currentRequest.subRequests[0]?.state === RequestState.SENT}
+                            drawAreas={drawAreas}
+                        />
+                    )}
+
+
+                    <div>{!error.isDismissed && <ErrorMessage error={error} />}</div>
+
+                    <RoutingResults
+                        info={route.routingResult.info}
+                        paths={route.routingResult.paths}
+                        selectedPath={route.selectedPath}
+                        currentRequest={query.currentRequest}
+                        profile={query.routingProfile.name}
+                    />
+                </div>
+
                 </div>
             ) : (
                 <div className={styles.sidebarWhenClosed} onClick={() => setShowSidebar(true)}>
@@ -265,13 +289,17 @@ function LargeScreenLayout({ query, route, map, error, mapOptions, encodedValues
             <div className={styles.map}>
                 <MapComponent map={map} />
             </div>
-
             <div className={styles.pathDetails}>
                 <PathDetails selectedPath={route.selectedPath} />
-            </div>
+            </div>  
+
+            
         </>
-    )
+        
+    );
 }
+
+
 
 function SmallScreenLayout({ query, route, map, error, mapOptions, encodedValues, drawAreas }: LayoutProps) {
     return (
@@ -306,9 +334,7 @@ function SmallScreenLayout({ query, route, map, error, mapOptions, encodedValues
                 />
             </div>
 
-            <div className={styles.smallScreenPoweredBy}>
-                <PoweredBy />
-            </div>
+            
         </>
     )
 }

@@ -6,4 +6,5 @@ client/dist/
 client/*~
 client/config-*.js
 server/node_modules
+server/data/hanoi_poi.json
 node_modules
