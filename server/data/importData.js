@@ -9,7 +9,7 @@ const prepareData = require("./prepare");
 const uri = "mongodb://localhost:27017"; // Replace with your MongoDB URI
 const client = new MongoClient(uri);
 const dbName = "tmdt";
-const collectionName = "poi_test";
+const collectionName = "poi";
 
 // File path
 const tempFilePath = "hanoi_poi.json"; // Temporary file for the JSON

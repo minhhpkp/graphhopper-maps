@@ -5,7 +5,7 @@ export async function getVietnamPoiCollection() {
     // await connectToDB();
 
     const database = client.db("tmdt");
-    const collection = database.collection("poi_test");
+    const collection = database.collection("poi");
 
     console.log("Database and collection initialized successfully.");
 
