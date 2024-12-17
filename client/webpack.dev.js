@@ -22,7 +22,7 @@ const develop = {
     devServer: {
         static: path.resolve(__dirname, 'dist'),
         https: false,
-        port: 3000,
+        port: 3001,
         host: '0.0.0.0',
         proxy: [
             {

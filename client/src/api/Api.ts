@@ -68,7 +68,7 @@ export class ApiImpl implements Api {
 
     async info(): Promise<ApiInfo> {
         const response = await fetch(this.getRoutingURLWithKey('info').toString(), {
-            headers: { Accept: 'application/json' },
+            headers: { Accept: 'application/json', 'ngrok-skip-browser-warning': 'yes' },
         }).catch(() => {
             throw new Error('Could not connect to the Service. Try to reload!')
         })
@@ -112,7 +112,7 @@ export class ApiImpl implements Api {
         }
 
         const response = await fetch(url.toString(), {
-            headers: { Accept: 'application/json' },
+            headers: { Accept: 'application/json', 'ngrok-skip-browser-warning': 'yes' },
         })
 
         if (response.ok) {
@@ -199,6 +199,7 @@ export class ApiImpl implements Api {
             headers: {
                 Accept: 'application/json',
                 'Content-Type': 'application/json',
+                'ngrok-skip-browser-warning': 'yes',
             },
         })
 
